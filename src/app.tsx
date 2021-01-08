@@ -24,68 +24,82 @@ function getMousePos(evt, canv) {
     };
 }
 
-// resolves x any y coordinates based on angle from positive x-axis. -Pi to Pi range
-function find_x_and_y(radius, start_x, start_y, angle) {
-    
-    let x;
-    let y;
-    // if in right top quadrant
-    if (angle >= -pi / 2 && angle < 0) {
-        angle = Math.abs(angle);
-        x = Math.cos(angle) * radius + start_x;
-        y = start_y + (radius - Math.sin(angle) * radius);
+// resolves x and y  coordinates by angle meassured from positive y-axis
+function resolve_coordinates_by_angle(start_x, start_y, distance, angle){
+    if(angle === 360){
+        angle = 0;
     }
-    // if in right bottom quadrant
-    else if (angle >= 0 && angle <= pi / 2) {
-        x = Math.cos(angle) * radius + start_x;
-        y = start_y + (Math.sin(angle) * radius + radius);
+    if(angle > 360){
+        return resolve_coordinates_by_angle(start_x, start_y, distance, angle - 360);
     }
-    // if in left top quadrant
-    else if (angle < -pi / 2 && angle >= -pi) {
-        angle = Math.abs(angle);
-        x = start_x + Math.cos(angle) * radius
-        
-        y = start_y + (radius - Math.sin(angle) * radius);
-
-
+    if(angle < 0){
+        return resolve_coordinates_by_angle(start_x, start_y, distance, angle + 360);
     }
-    // if in left bottom quadrant
-    else if(angle > pi/2 && angle <= pi){
-        x = start_x + Math.cos(angle) * radius
-        y = start_y + (Math.sin(angle) * radius + radius);
-    }
-    
-    return [x, y];
-
-
-}
-/*
-function resolve_coordinates_by_angle(start_x, start_y, radius, angle){
-    if(angle === 90){
+    if(angle === 0){
         return {
-            x: start_x + radius,
-            y: start_y
-
+            x: start_x,
+            y: start_y - distance
         }
     }
-    let scoped_angle = Math.abs(90 - angle);
-    let temp = Math.sin(to_radians(scoped_angle)) * radius;
-    
-    let y_coord;
-    if(angle < 90){
-        y_coord = start_y - temp;
+    else if(angle > 0 && angle < 90){
+        angle = to_radians(angle);
+        let o = Math.sin(angle) * distance;
+        let a = Math.sqrt(Math.pow(distance, 2) - Math.pow(o, 2));
+        return {
+            x: start_x + o,
+            y: start_y - a
+        }
     }
-    else{
-        y_coord = start_y + temp;
+    else if(angle === 90){
+        return {
+            x: start_x + distance,
+            y: start_y
+        }
     }
-    let x_coord = Math.sqrt(Math.pow(radius, 2) - Math.pow(temp, 2));
-    
-    return {
-        x: x_coord,
-        y: y_coord
+    else if(angle > 90 && angle < 180){
+        angle = 180 - angle;
+        angle = to_radians(angle);
+        let o = Math.sin(angle) * distance;
+        let a = Math.sqrt(Math.pow(distance, 2) - Math.pow(o, 2));
+        return {
+            x: start_x + o,
+            y: start_y + a
+        }
+    }
+    else if(angle === 180){
+        return {
+            x: start_x,
+            y: start_y + distance
+        }
+    }
+    else if(angle > 180 && angle < 270){
+        angle = angle - 180;
+        angle = to_radians(angle);
+        let o = Math.sin(angle) * distance;
+        let a = Math.sqrt(Math.pow(distance, 2) - Math.pow(o, 2));
+        return {
+            x: start_x - o,
+            y: start_y + a
+        }
+    }
+    else if(angle === 270){
+        return {
+            x: start_x - distance,
+            y: start_y
+        }
+    }
+    else if(angle > 270 && angle < 360){
+        angle = 360 - angle;
+        angle = to_radians(angle);
+        let o = Math.sin(angle) * distance;
+        let a = Math.sqrt(Math.pow(distance, 2) - Math.pow(o, 2));
+        return {
+            x: start_x - o,
+            y: start_y - a
+        }
     }
 }
-*/
+
 //gives random integer between min(inclusive) and max(inclusive)
 function get_random_int(min, max) {
     min = Math.ceil(min);
@@ -147,9 +161,9 @@ class Graph extends React.Component{
         let node_names = Object.keys(this.graph);
         
         let n = node_names.length;
-        x_distance_between_nodes = 35 * n;
+        x_distance_between_nodes = 32 * n;
         let center_x = canvas.width / 2;
-        let center_y = canvas.height / 2 - x_distance_between_nodes;
+        let center_y = canvas.height / 2;
         
         let local_node_list = [];
         
@@ -162,6 +176,7 @@ class Graph extends React.Component{
         }
         for(let i = 0; i < n; i += 1){
             let angle = angles[i];
+            /*
             angle = to_radians(angle);
             angle = angle - pi/2;
             if (angle > pi){
@@ -170,7 +185,11 @@ class Graph extends React.Component{
             let temp = find_x_and_y(x_distance_between_nodes, center_x, center_y, angle);
             let x = temp[0];
             let y = temp[1];
-            console.log(angle);
+            */
+            let coroordinates = resolve_coordinates_by_angle(center_x, center_y, x_distance_between_nodes, angle);
+            let x = coroordinates.x;
+            let y = coroordinates.y;
+            console.log();
             local_node_list.push(new Node(x, y, node_names[i]));
         }
         
@@ -233,8 +252,12 @@ class App extends React.Component{
             "G": {"C": 15},
             "GT":{},
             "GTO": {},
-            "KTO" : {},
-            "GGG": {}
+            "Kk": {},
+            "RR": {},
+            "QE": {},
+            
+            
+            
             
             
             
