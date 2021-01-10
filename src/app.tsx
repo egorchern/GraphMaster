@@ -297,8 +297,13 @@ class Graph extends React.Component {
     constructor(props) {
         super(props);
         this.graph = this.props.graph;
+        this.state = {
+            canvas_width: window.innerWidth * 0.9,
+            canvas_height: window.innerHeight * 0.5
+        }
         this.node_list = [];
         this.edge_list = [];
+        window.onresize = this.on_resize;
     }
     is_edge_directional(start_node_name, end_node_name) {
         let end_node_edges = this.graph[end_node_name];
@@ -402,6 +407,12 @@ class Graph extends React.Component {
             edge.draw();
         });
     }
+    on_resize = (e) => {
+        this.setState({
+            canvas_width: window.innerWidth * 0.9,
+            canvas_heigth: window.innerHeight * 0.5
+        })
+    }
     componentDidMount() {
         canvas = document.querySelector("#canvas");
         ctx = canvas.getContext("2d");
@@ -409,16 +420,25 @@ class Graph extends React.Component {
         this.populate_edge_list();
         this.draw_edges();
         this.draw_nodes();
-        
+    }
+    componentDidUpdate(){
+        this.populate_node_list();
+        this.populate_edge_list();
+        this.draw_edges();
+        this.draw_nodes();
     }
     render() {
         return (
+            
             <canvas
-                id="canvas"
-                width="1000"
-                height="800"
-                onMouseMove={this.props.onMouseMove}
-            ></canvas>
+            id="canvas"
+            width={this.state.canvas_width}
+            height={this.state.canvas_height}
+            onMouseMove={this.props.onMouseMove}
+            >
+            </canvas>
+            
+            
         );
     }
 }

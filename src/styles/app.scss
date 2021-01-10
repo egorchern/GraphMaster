@@ -23,8 +23,10 @@ body {
 }
 
 #canvas{
+    overflow: auto;
     border: 1px solid black;
     border-radius: 11px;
+    
     background-color: white;
 }
 
