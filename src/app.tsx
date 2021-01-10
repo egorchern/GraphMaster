@@ -4,13 +4,21 @@ import { render } from "react-dom";
 let root = document.querySelector("#root");
 let canvas, ctx;
 let node_raidus = 27;
+let distance_multiple = 0.42;
 let x_distance_between_nodes;
-let edge_width = 3;
+let edge_width = 1;
+let directional_indicator_length = 16;
+let directional_indicator_angle = 30;
 const pi = Math.PI;
+
 
 //convert degrees to radians
 function to_radians(degrees) {
     return degrees * (pi / 180);
+}
+
+function to_degrees(radians){
+    return radians * (180 / pi);
 }
 
 // return true position of mouse on canvas;
@@ -20,6 +28,31 @@ function getMousePos(evt, canv) {
         x: ((evt.clientX - rect.left) / (rect.right - rect.left)) * canv.width,
         y: ((evt.clientY - rect.top) / (rect.bottom - rect.top)) * canv.height,
     };
+}
+
+// return angle of line created by points with positive y-axis
+function resolve_angle_between_points(x1, y1, x2, y2){
+    if(y1 === y2){
+        if(x1 < x2){
+            return 90;
+        }
+        else{
+            return 270;
+        }
+    }
+    else if(x1 === x2){
+        if(y1 < y2){
+            return 180;
+        }
+        else{
+            return 0;
+        }
+    }
+    let o = Math.abs(x1 - x2);
+    let a = Math.abs(y1 - y2);
+    
+    let angle = to_degrees(Math.atan((o / a)));
+    return angle;
 }
 
 // resolves x and y  coordinates by angle meassured from positive y-axis
@@ -124,13 +157,78 @@ class Edge {
         this.directional = directional;
     }
     draw() {
+        let weight_number_offset = 12;
         ctx.save();
         ctx.beginPath();
         ctx.strokeStyle = "hsl(0, 0%, 10%)";
-        ctx.strokeWidth = edge_width;
+        ctx.lineWidth = edge_width;
         ctx.moveTo(this.start_x, this.start_y);
         ctx.lineTo(this.end_x, this.end_y);
         ctx.stroke();
+        let target_x = (Math.abs(this.start_x - this.end_x)) * distance_multiple;
+        if(this.start_x < this.end_x){
+            target_x = this.start_x + target_x + weight_number_offset;
+        }
+        else{
+            target_x = this.start_x - target_x - weight_number_offset;
+        }
+        let target_y = (Math.abs(this.start_y - this.end_y)) * distance_multiple;
+        if(this.start_y < this.end_y){
+            target_y = this.start_y + target_y - weight_number_offset;
+        }
+        else{
+            target_y = this.start_y - target_y + weight_number_offset;
+        }
+        
+        ctx.font = "22px Lato";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        
+        ctx.fillText(String(this.weight), target_x, target_y, 100);
+        if(this.directional){
+            let multiple = 0.85;
+            target_x = (Math.abs(this.start_x - this.end_x)) * multiple;
+            if(this.start_x < this.end_x){
+                target_x = this.start_x + target_x;
+            }
+            else{
+                target_x = this.start_x - target_x;
+            }
+            target_y = (Math.abs(this.start_y - this.end_y)) * multiple;
+            if(this.start_y < this.end_y){
+                target_y = this.start_y + target_y;
+            }
+            else{
+                target_y = this.start_y - target_y;
+            }
+            let angle_between = resolve_angle_between_points(this.start_x, this.start_y, this.end_x, this.end_y);
+            console.log(angle_between);
+            let angles_of_indicators;
+            if(this.start_x > this.end_x && this.start_y < this.end_y){
+                angles_of_indicators = [angle_between - directional_indicator_angle, angle_between + directional_indicator_angle];
+            }
+            else if(this.start_x < this.end_x && this.start_y < this.end_y){
+                angles_of_indicators = [360 - (angle_between - directional_indicator_angle), 360 - (angle_between + directional_indicator_angle)];
+            }
+            else if(this.start_x > this.end_x && this.start_y > this.end_y){
+                angles_of_indicators = [(180 - angle_between) - directional_indicator_angle, (180 - angle_between) + directional_indicator_angle];
+            }
+            else if(this.start_x < this.end_x && this.start_y > this.end_y){
+                angles_of_indicators = [360 - ((180 - angle_between) - directional_indicator_angle), 360 - ((180 - angle_between) + directional_indicator_angle)];
+            }
+            for(let i = 0; i < angles_of_indicators.length; i += 1){
+                let temp = resolve_coordinates_by_angle(target_x, target_y, directional_indicator_length, angles_of_indicators[i]);
+                console.log(temp);
+                let indicator_x = temp.x;
+                let indicator_y = temp.y;
+                ctx.beginPath();
+                ctx.moveTo(target_x, target_y);
+                ctx.lineTo(indicator_x, indicator_y);
+                ctx.stroke();
+            }
+            
+            
+        }
         ctx.restore();
     }
 }
@@ -233,7 +331,7 @@ class Graph extends React.Component {
 
             local_node_list.push(new Node(x, y, node_names[i]));
         }
-
+        console.log(local_node_list);
         this.node_list = local_node_list;
     }
     populate_edge_list() {
@@ -277,8 +375,10 @@ class Graph extends React.Component {
                 
             
             }
-            this.edge_list = local_edge_list;
+            
         }
+        console.log(local_edge_list);
+        this.edge_list = local_edge_list;
     }
     draw_nodes() {
         this.node_list.forEach((node) => {
@@ -335,11 +435,11 @@ class App extends React.Component {
     };
     render() {
         let graph = {
-            A: { B: 4, C: 12 },
+            A: { B: 4, C: 12, G: 112 },
             B: { D: 13, A: 4 },
-            C: { A: 12, D: 8, F: 14, G: 15 },
-            D: { B: 13, C: 8 },
-            F: { C: 14 },
+            C: { D: 8, F: 14, G: 15 },
+            D: { B: 13, C: 8, G: 1 },
+            F: { C: 14, A: 9},
             G: { C: 15 },
 
         };
