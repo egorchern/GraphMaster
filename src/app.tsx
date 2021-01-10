@@ -4,7 +4,7 @@ import { render } from "react-dom";
 let root = document.querySelector("#root");
 let canvas, ctx;
 let node_raidus = 27;
-let distance_multiple = 0.42;
+let distance_multiple = 0.57;
 let x_distance_between_nodes;
 let edge_width = 1;
 let directional_indicator_length = 16;
@@ -157,7 +157,7 @@ class Edge {
         this.directional = directional;
     }
     draw() {
-        let weight_number_offset = 12;
+        let weight_number_offset = 13;
         ctx.save();
         ctx.beginPath();
         ctx.strokeStyle = "hsl(0, 0%, 10%)";
@@ -184,7 +184,7 @@ class Edge {
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         
-        ctx.fillText(String(this.weight), target_x, target_y, 100);
+        ctx.fillText(String(this.weight), target_x, target_y, 40);
         if(this.directional){
             let multiple = 0.85;
             target_x = (Math.abs(this.start_x - this.end_x)) * multiple;
@@ -215,6 +215,18 @@ class Edge {
             }
             else if(this.start_x < this.end_x && this.start_y > this.end_y){
                 angles_of_indicators = [360 - ((180 - angle_between) - directional_indicator_angle), 360 - ((180 - angle_between) + directional_indicator_angle)];
+            }
+            else if(this.start_x < this.end_x && this.start_y === this.end_y){
+                angles_of_indicators = [270 - directional_indicator_angle, 270 + directional_indicator_angle];
+            }
+            else if(this.start_x === this.end_x && this.start_y < this.end_y){
+                angles_of_indicators = [directional_indicator_angle, 360 - directional_indicator_angle];
+            }
+            else if(this.start_x > this.end_x && this.start_y === this.end_y){
+                angles_of_indicators = [90 - directional_indicator_angle, 90 + directional_indicator_angle];
+            }
+            else if(this.start_x === this.end_x && this.start_y > this.end_y){
+                angles_of_indicators = [180 - directional_indicator_angle, 180 + directional_indicator_angle];
             }
             for(let i = 0; i < angles_of_indicators.length; i += 1){
                 let temp = resolve_coordinates_by_angle(target_x, target_y, directional_indicator_length, angles_of_indicators[i]);
@@ -435,12 +447,12 @@ class App extends React.Component {
     };
     render() {
         let graph = {
-            A: { B: 4, C: 12, G: 112 },
-            B: { D: 13, A: 4 },
-            C: { D: 8, F: 14, G: 15 },
-            D: { B: 13, C: 8, G: 1 },
-            F: { C: 14, A: 9},
-            G: { C: 15 },
+           A:{B: 17, C: 18},
+           B:{A: 17, C: 15, D: 19},
+           C:{A: 18, B: 15, D: 20},
+           D:{C: 20, B: 19, E: 16, A: 30},
+           E:{D: 16, B: 23},
+           F:{}
 
         };
         return (
