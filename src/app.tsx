@@ -147,7 +147,8 @@ class Edge {
     directional_indicator_angle: any;
     directional_indicator_length: any;
     font_size: any;
-    constructor(start_x, end_x, start_y, end_y, weight, directional, directional_indicator_angle, directional_indicator_length, font_size ) {
+    weight_number_offset: any;
+    constructor(start_x, end_x, start_y, end_y, weight, directional, directional_indicator_angle, directional_indicator_length, font_size, weight_number_offset ) {
         this.start_x = start_x;
         this.end_x = end_x;
         this.start_y = start_y;
@@ -157,9 +158,11 @@ class Edge {
         this.directional_indicator_angle = directional_indicator_angle;
         this.directional_indicator_length = directional_indicator_length;
         this.font_size = font_size;
+        this.weight_number_offset = weight_number_offset;
     }
     draw() {
-        let weight_number_offset = 13;
+        let weight_number_offset = this.weight_number_offset;
+        // TODO this needs to be scalable as well.
         ctx.save();
         ctx.beginPath();
         ctx.strokeStyle = "hsl(0, 0%, 10%)";
@@ -181,12 +184,14 @@ class Edge {
         else {
             target_y = this.start_y - target_y + weight_number_offset;
         }
-
+        if(this.start_x === this.end_x){
+            target_x -= weight_number_offset * 0.45;
+        }
         ctx.font = `${this.font_size}px Lato`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-
-        ctx.fillText(String(this.weight), target_x, target_y, 40);
+        ctx.beginPath();
+        ctx.fillText(String(this.weight), target_x, target_y, 35);
         if (this.directional) {
             let multiple = 0.85;
             target_x = (Math.abs(this.start_x - this.end_x)) * multiple;
@@ -297,6 +302,21 @@ class Canvas_mouse_position_tracker extends React.Component {
     }
 }
 
+class Graph_choose_menu extends React.Component{
+    constructor(props){
+        super(props);
+    }
+    render(){
+        return (
+            <div className="graph_menu">
+                <div className="existing_graphs_container">
+                    <h2>Saved Graphs</h2>
+                </div>
+            </div>
+        )
+    }
+}
+
 class Graph extends React.PureComponent {
     graph: any;
     node_list: any[];
@@ -308,6 +328,8 @@ class Graph extends React.PureComponent {
     directional_indicator_angle: number;
     node_font_size: number;
     edge_font_size: number;
+    weight: any;
+    weight_number_offset: number;
     constructor(props) {
         super(props);
         this.graph = this.props.graph;
@@ -396,7 +418,7 @@ class Graph extends React.PureComponent {
                     let start_node_obj = this.node_list[mapper[current_node_name]];
                     let end_node_obj = this.node_list[mapper[next_node_name]];
 
-                    let edge_obj = new Edge(start_node_obj.center_x, end_node_obj.center_x, start_node_obj.center_y, end_node_obj.center_y, weight, directional, this.directional_indicator_angle, this.directional_indicator_length, this.edge_font_size);
+                    let edge_obj = new Edge(start_node_obj.center_x, end_node_obj.center_x, start_node_obj.center_y, end_node_obj.center_y, weight, directional, this.directional_indicator_angle, this.directional_indicator_length, this.edge_font_size, this.weight_number_offset);
                     local_edge_list.push(edge_obj);
                 }
 
@@ -422,10 +444,11 @@ class Graph extends React.PureComponent {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         this.node_radius = Math.min(27, Math.max(18, this.state.canvas_width * 0.02));
         this.directional_indicator_length = Math.max(this.state.canvas_width * 0.01, 8);
-        this.x_distance_between_nodes = Math.max(this.node_radius, this.state.canvas_width * 0.022) * this.n;
+        this.x_distance_between_nodes = Math.max(this.node_radius, this.state.canvas_width * 0.025) * this.n;
         this.node_font_size = Math.min(44, Math.max(this.node_radius - 2, this.state.canvas_width * 0.038));
         this.edge_font_size = Math.min(22, Math.max(16, this.state.canvas_width * 0.02));
-        console.log(this.edge_font_size, this.node_font_size);
+        this.weight_number_offset = Math.min(12, Math.max(7, this.state.canvas_width * 0.01));
+        console.log(this.edge_font_size, this.node_font_size, this.weight_number_offset);
         this.populate_node_list();
         this.populate_edge_list();
         
@@ -492,8 +515,9 @@ class App extends React.Component {
                 C: { A: 18, B: 15, D: 20 },
                 D: { C: 20, B: 19, E: 16, A: 30 },
                 E: { D: 16, B: 23 },
-                F: {}
-            }
+                F: { B: 1222}
+            },
+            should_display_menu: true
         };
     }
     on_canvas_mouse_move = (e) => {
@@ -508,14 +532,25 @@ class App extends React.Component {
     render() {
         
         return (
-            <div>
-                <Canvas_mouse_position_tracker
-                    x={this.state.canvas_mouse_pos.x}
-                    y={this.state.canvas_mouse_pos.y}
-                />
-                <Graph graph={this.state.graph} onMouseMove={this.on_canvas_mouse_move} />
+            <div className="app_container">
+                {this.state.should_display_menu != true &&
+                    <div>
+                        <Canvas_mouse_position_tracker
+                        x={this.state.canvas_mouse_pos.x}
+                        y={this.state.canvas_mouse_pos.y}
+                        />
+                        <Graph graph={this.state.graph} onMouseMove={this.on_canvas_mouse_move} />
+                    </div>
+                }
+                {this.state.should_display_menu === true &&
+                    <Graph_choose_menu/>
+                }
+                
             </div>
+            
         );
+            
+        
     }
 }
 

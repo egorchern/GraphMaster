@@ -13,15 +13,42 @@ body {
     height: 100%;
     padding: 0px;
     margin: 0px;
-    background-color: hsl(0, 0%, 91.5%);
+    background-color: hsl(0, 0%, 93.5%);
     overflow-y: auto;
     overflow-x: hidden;
+    
+}
+.app_container{
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
 }
+.graph_menu{
+    /*
+    background-color: #85FFBD;
+    background-image: linear-gradient(45deg, #85FFBD 0%, #FFFB7D 100%);
+    
+    background-color: #8BC6EC;
+    background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%);
+    */
+    background-color: white;
+    border: 2px solid #DFE1E6;
+    
+    border-radius: 12px;
+    padding: 12px;
 
+    width: 80%;
+    height: 600px;
+}
+.existing_graphs_container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
 #canvas{
     overflow: auto;
     border: 1px solid black;
