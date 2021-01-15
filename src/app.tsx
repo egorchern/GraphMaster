@@ -1,5 +1,7 @@
 import * as React from "react";
 import { render } from "react-dom";
+import { SlideDown } from 'react-slidedown'
+
 
 let root = document.querySelector("#root");
 let canvas, ctx;
@@ -8,22 +10,22 @@ let edge_width = 1;
 
 const pi = Math.PI;
 
-function get_graph_object_list(){
+function get_graph_object_list() {
     let list = localStorage.getItem("graph_object_list");
-    
+
     try {
         list = JSON.parse(list);
     } catch (error) {
         list = [];
     }
-    
-    if(list === null){
+
+    if (list === null) {
         list = [];
     }
     return list;
 }
 
-function set_graph_object_list(graph_object_list){
+function set_graph_object_list(graph_object_list) {
     localStorage.setItem("graph_object_list", JSON.stringify(graph_object_list, null, 4));
 }
 
@@ -167,7 +169,7 @@ class Edge {
     directional_indicator_length: any;
     font_size: any;
     weight_number_offset: any;
-    constructor(start_x, end_x, start_y, end_y, weight, directional, directional_indicator_angle, directional_indicator_length, font_size, weight_number_offset ) {
+    constructor(start_x, end_x, start_y, end_y, weight, directional, directional_indicator_angle, directional_indicator_length, font_size, weight_number_offset) {
         this.start_x = start_x;
         this.end_x = end_x;
         this.start_y = start_y;
@@ -203,7 +205,7 @@ class Edge {
         else {
             target_y = this.start_y - target_y + weight_number_offset;
         }
-        if(this.start_x === this.end_x){
+        if (this.start_x === this.end_x) {
             target_x -= weight_number_offset * 0.45;
         }
         ctx.font = `${this.font_size}px Lato`;
@@ -228,7 +230,7 @@ class Edge {
                 target_y = this.start_y - target_y;
             }
             let angle_between = resolve_angle_between_points(this.start_x, this.start_y, this.end_x, this.end_y);
-            
+
             let angles_of_indicators;
             if (this.start_x > this.end_x && this.start_y < this.end_y) {
                 angles_of_indicators = [angle_between - this.directional_indicator_angle, angle_between + this.directional_indicator_angle];
@@ -304,7 +306,7 @@ class Node {
         );
         ctx.restore();
     }
-    
+
 }
 
 class Canvas_mouse_position_tracker extends React.Component {
@@ -321,9 +323,10 @@ class Canvas_mouse_position_tracker extends React.Component {
     }
 }
 
-class Graph_choose_menu extends React.Component{
+class Graph_choose_menu extends React.Component {
+    //elem.style.height = `${elem.scrollHeight}px`;
     previous_index: number;
-    constructor(props){
+    constructor(props) {
         super(props);
         this.state = {
             selected_index: -1
@@ -331,97 +334,100 @@ class Graph_choose_menu extends React.Component{
         this.previous_index = -1;
     }
     on_graph_click = (index) => {
-        if(this.previous_index === index){
-            this.previous_index = -1;
-            this.setState({
-                selected_index: -1
-            })
-            
-        }
-        else{
+        if(index != this.previous_index){
             this.previous_index = index;
             this.setState({
                 selected_index: index
             })
         }
-        
     }
-    render(){
+    on_node_click = (name) => {
+
+    }
+    render() {
         let graph_object_list = this.props.graph_object_list;
-        
+
         let graph_items = graph_object_list.map((graph_object, index) => {
             let graph_name = graph_object.name;
             let class_list = "saved_graph ";
-            let element;
-            if(this.state.selected_index === -1){
-                class_list += "hoverable ";
-                element = (
-                    <div className={class_list} key={index} onClick={() => this.on_graph_click(index)}>
-                        <span>{graph_name}</span>
-                    </div>
-                )
-            }
-            else if(this.state.selected_index === index){
+            if (this.state.selected_index === index) {
                 class_list += "selected";
-                element = (
-                    <div className={class_list} key={index} onClick={() => this.on_graph_click(index)}>
-                        <span>{graph_name}</span>
-                    </div>
-                )
             }
             else{
-                element = (
-                    <div className={class_list} key={index}>
-                        <span>{graph_name}</span>
-                    </div>
-                )
+                class_list += "hoverable";
             }
+            let graph = graph_object.graph;
+            let node_names = Object.keys(graph);
+            return (
 
-            
-            return element
-                
-            
+                <div className={class_list} key={index} onClick={() => {
+                    if (index != this.state.selected_index) {
+                        this.on_graph_click(index);
+                    }
+                }}>
+                    <span>{graph_name}</span>
+                    <SlideDown className="my_slide_down">
+                        {this.state.selected_index === index &&
+                            <div className="graph_details">
+                                <h4>Nodes:</h4>
+                                {
+                                    node_names.map((name, index) => {
+                                        return (
+                                            <div key={name} className="node_container">
+                                                <span>{name}</span>
+                                            </div>
+                                        )
+                                    })
+                                }
+                            </div>
+                        }
+                    </SlideDown>
+
+                </div>
+            )
         })
-        let add_graph_element;
         let class_list = "saved_graph ";
-        if(this.state.selected_index === -1){
-            class_list += "hoverable ";
-            add_graph_element = (
-                <div id="add_new_graph_button" className={class_list} onClick={() => this.on_graph_click(-2)}>
-                    <span>Add new</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="add_svg_icon" fill="green" viewBox="0 0 16 16">
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    </svg>
-                </div>
-            )
-        }
-        else if(this.state.selected_index === -2){
-            class_list += "selected ";
-            add_graph_element = (
-                <div id="add_new_graph_button" className={class_list} onClick={() => this.on_graph_click(-2)}>
-                    <span>Add new</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="add_svg_icon" fill="green" viewBox="0 0 16 16">
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    </svg>
-                </div>
-            )
+        if (this.state.selected_index === -2) {
+            class_list += "selected";
         }
         else{
-            add_graph_element = (
-                <div id="add_new_graph_button" className={class_list}>
-                    <span>Add new</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" className="add_svg_icon" fill="green" viewBox="0 0 16 16">
-                        <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
-                    </svg>
-                </div>
-            )
+            class_list += "hoverable";
         }
         return (
             <div className="graph_menu">
                 <div className="saved_graphs_container">
-                    <h2 className="margin_bottom">Saved Graphs</h2>
+                    <h2 className="margin_bottom">Saved Graphs:</h2>
                     {graph_items}
-                    {add_graph_element}
+                    <div id="add_new_graph_button" className={class_list} onClick={() => {
+                        if (-2 != this.state.selected_index) {
+                            this.on_graph_click(-2);
+                        }
+                    }}>
+                        <div className="flex_direction_row">
+                            <span>Add new</span>
+                            <svg viewBox="0 0 16 16" className="add_svg_icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z"/>
+                                <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z"/>
+                                <path fillRule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5z"/>
+                            </svg>
+                        </div>
+                        <SlideDown className="my_slide_down">
+                            {
+                                this.state.selected_index === -2 &&
+                                <div className="create_graph_menu">
+                                    <span>Graph name:</span>
+                                    <div className="input-group">
+                                        <input className="form-control" defaultValue="Default">
+                                        </input>
+                                    </div>
+                                    <button className="btn btn-primary" id="create_graph_btn">
+                                        Create
+                                    </button>
+                                </div>
+                            }
+                        </SlideDown>
+                        
+                    </div>
                 </div>
             </div>
         )
@@ -446,7 +452,7 @@ class Graph extends React.PureComponent {
         this.graph = this.props.graph;
         this.state = {
             canvas_width: window.innerWidth * 0.9,
-            
+
         }
         this.state.canvas_height = Math.min(630, Math.max(this.state.canvas_width * 0.4, 300));
         this.node_list = [];
@@ -505,7 +511,7 @@ class Graph extends React.PureComponent {
             let name = temp.name;
             mapper[name] = i;
         }
-        
+
         for (let i = 0; i < node_names.length; i += 1) {
 
             let current_node_name = node_names[i];
@@ -562,7 +568,7 @@ class Graph extends React.PureComponent {
         console.log(this.edge_font_size, this.node_font_size, this.weight_number_offset);
         this.populate_node_list();
         this.populate_edge_list();
-        
+
         this.draw_edges();
         this.draw_nodes();
     }
@@ -588,11 +594,11 @@ class Graph extends React.PureComponent {
         ctx = canvas.getContext("2d");
         this.main();
     }
-    
+
     componentDidUpdate() {
         this.main();
     }
-    
+
     render() {
         return (
 
@@ -619,9 +625,10 @@ class App extends React.Component {
         graph_object_list.push({
             name: "Sample2",
             graph: {
-                A: {B: 3, C: 6},
-                B: {A: 3, C: 8},
-                C: {A: 6, B: 8}
+                A: { B: 3, C: 6 },
+                B: { A: 3, C: 8 },
+                C: { A: 6, B: 8 },
+                D: { A: 3 }
             }
         })
         this.state = {
@@ -646,27 +653,27 @@ class App extends React.Component {
         console.log(index);
     }
     render() {
-        
+
         return (
             <div className="app_container">
                 {this.state.should_display_menu != true &&
                     <div>
                         <Canvas_mouse_position_tracker
-                        x={this.state.canvas_mouse_pos.x}
-                        y={this.state.canvas_mouse_pos.y}
+                            x={this.state.canvas_mouse_pos.x}
+                            y={this.state.canvas_mouse_pos.y}
                         />
                         <Graph graph={this.state.graph_list[0]} onMouseMove={this.on_canvas_mouse_move} />
                     </div>
                 }
                 {this.state.should_display_menu === true &&
-                    <Graph_choose_menu graph_object_list={this.state.graph_object_list} on_graph_choose_click={this.on_graph_choose_click}/>
+                    <Graph_choose_menu graph_object_list={this.state.graph_object_list} on_graph_choose_click={this.on_graph_choose_click} />
                 }
-                
+
             </div>
-            
+
         );
-            
-        
+
+
     }
 }
 

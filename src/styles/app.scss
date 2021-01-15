@@ -1,5 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,400;0,500;1,400;1,500&display=swap");
-
+$primary_hover_color: hsl(203, 84%, 60%);
 html,
 body {
     width: 100%;
@@ -54,37 +54,107 @@ body {
     align-items: center;
     justify-content: center;
 }
+
 .saved_graph{
     margin: 8px;
     padding: 8px;
-    cursor: default;
     width: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
     border-radius: 12px;
-    transition: box-shadow 0.2s ease-in-out;
+    transition: box-shadow 0.2s ease-in-out, height 0.6s cubic-bezier(0.47, 0, 0.745, 0.715);
+    
     span{
         font-size: 1.5rem;
     }
 }
+.graph_details{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    span{
+        font-size: 1.25rem;
+    }
+}
+.my_slide_down{
+    margin-top: 5px;
+    width: 95%;
+    border-top: 2px solid hsl(0, 0%, 85%);
+    padding-top: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.react-slidedown {
+    height: 0;
+    
+    transition-property: none;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-in-out;
+    
+}
+
+.react-slidedown.transitioning {
+    overflow-y: hidden;
+}
+
+.react-slidedown.closed {
+    display: none;
+}
+
 .saved_graph.hoverable{
     cursor: pointer;
 }
+.flex_direction_row{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
 .saved_graph.hoverable:hover{
-    box-shadow: 0px 0px 6px 3px #6DBFF2;
+    box-shadow: 0px 0px 6px 3px $primary_hover_color;
 }
 .saved_graph.selected{
-    box-shadow: 0px 0px 6px 3px #6DBFF2;
-    cursor: pointer;
+    box-shadow: 0px 0px 6px 3px $primary_hover_color;
+    cursor: default;
+}
+.node_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 8px;
+    padding: 8px;
 }
 .margin_bottom{
     margin-bottom: 25px;
 }
 .add_svg_icon{
-    width: 2.3rem;
-    height: 2.3rem;
+    margin-left: 8px;
+    width: 2rem;
+    height: 2rem;
+}
+.create_graph_menu{
+    width: 95%;
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .input_group{
+        margin-top: 4px;
+    }
+    .btn{
+        margin-top: 20px;
+        width: 40%;
+        max-width: 165px;
+        min-width: 90px;
+    }
 }
 #canvas{
     overflow: auto;
@@ -93,7 +163,9 @@ body {
     
     background-color: white;
 }
-
+#create_graph_btn{
+    font-size: 1.75rem;
+}
 #mouse_tracker{
     position: fixed;
     top: 10px;
