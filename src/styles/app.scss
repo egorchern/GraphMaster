@@ -81,10 +81,10 @@ body {
     }
 }
 .my_slide_down{
-    margin-top: 5px;
+    margin-top: 6px;
     width: 95%;
     border-top: 2px solid hsl(0, 0%, 85%);
-    padding-top: 5px;
+    padding-top: 6px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -148,6 +148,9 @@ body {
     align-items: center;
     .input_group{
         margin-top: 4px;
+    }
+    .form-control{
+        font-size: 1.25rem;
     }
     .btn{
         margin-top: 20px;
