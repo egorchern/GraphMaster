@@ -66,7 +66,7 @@ body {
     align-items: center;
     border-radius: 12px;
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
-    
+    position: relative;
     span{
         font-size: 1.5rem;
     }
@@ -152,6 +152,19 @@ body {
     margin-left: 8px;
     width: 2rem;
     height: 2rem;
+}
+.delete_icon{
+    width: 100%;
+    height: auto;
+    max-width: 30px;
+    padding: 4px;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+}
+.delete_icon:hover{
+    box-shadow: 0px 0px 6px 3px $secondary_hover_color;
 }
 .add_node_svg_icon{
     margin-left: 8px;

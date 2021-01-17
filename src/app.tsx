@@ -1,8 +1,8 @@
 import * as React from "react";
 import { render } from "react-dom";
 import { SlideDown } from 'react-slidedown'
-
-
+import assets from "./images/*.webp";
+console.log(assets);
 let root = document.querySelector("#root");
 let canvas, ctx;
 let distance_multiple = 0.57;
@@ -567,6 +567,14 @@ class Graph_choose_menu extends React.Component {
                }
             }}>
                <span>{graph_name}</span>
+               {
+                  this.state.selected_graph_index === graph_index && 
+                  <img src={assets.delete_icon} className="delete_icon" onClick={() => {
+                     this.props.on_graph_delete_click(graph_index);
+                  }}>
+                  </img>
+               }
+               
                <SlideDown className="my_slide_down">
                   {this.state.selected_graph_index === graph_index &&
                      <div className="graph_details">
@@ -778,6 +786,14 @@ class App extends React.Component {
          new_node_name: event.target.value
       })
    }
+   on_graph_delete_click = (graph_index) => {
+      let new_graph_object_list = this.state.graph_object_list;
+      new_graph_object_list.splice(graph_index, 1);
+      set_graph_object_list(new_graph_object_list);
+      this.setState({
+         graph_object_list: new_graph_object_list
+      })
+   }
    render() {
 
       return (
@@ -800,6 +816,7 @@ class App extends React.Component {
                on_node_add_submit={this.on_node_add_submit}
                on_node_add_value_change={this.on_node_add_value_change}
                new_node_input_value={this.state.new_node_name}
+               on_graph_delete_click={this.on_graph_delete_click}
                />
             }
 
