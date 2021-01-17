@@ -308,138 +308,6 @@ class Node {
    }
 
 }
-
-class Canvas_mouse_position_tracker extends React.Component {
-   constructor(props) {
-      super(props);
-   }
-   render() {
-      return (
-         <div id="mouse_tracker">
-            <span>X: {this.props.x}</span>
-            <span>Y: {this.props.y}</span>
-         </div>
-      );
-   }
-}
-
-class Graph_choose_menu extends React.Component {
-   //elem.style.height = `${elem.scrollHeight}px`;
-   previous_index: number;
-   constructor(props) {
-      super(props);
-      this.state = {
-         selected_index: -1,
-         
-      }
-      this.previous_index = -1;
-   }
-   on_graph_click = (index) => {
-      if (index != this.previous_index) {
-         this.previous_index = index;
-         this.setState({
-            selected_index: index
-         })
-      }
-   }
-   on_node_click = (name) => {
-
-   }
-   on_input_change = (event) => {
-      this.setState({
-         graph_name: event.target.value
-      });
-   }
-   render() {
-      let graph_object_list = this.props.graph_object_list;
-
-      let graph_items = graph_object_list.map((graph_object, index) => {
-         let graph_name = graph_object.name;
-         let class_list = "saved_graph ";
-         if (this.state.selected_index === index) {
-            class_list += "selected";
-         }
-         else {
-            class_list += "hoverable";
-         }
-         let graph = graph_object.graph;
-         let node_names = Object.keys(graph);
-         return (
-
-            <div className={class_list} key={index} onClick={() => {
-               if (index != this.state.selected_index) {
-                  this.on_graph_click(index);
-               }
-            }}>
-               <span>{graph_name}</span>
-               <SlideDown className="my_slide_down">
-                  {this.state.selected_index === index &&
-                     <div className="graph_details">
-                        <h4>Nodes:</h4>
-                        {
-                           node_names.map((name, index) => {
-                              return (
-                                 <div key={name} className="node_container">
-                                    <span>{name}</span>
-                                 </div>
-                              )
-                           })
-                        }
-                     </div>
-                  }
-               </SlideDown>
-
-            </div>
-         )
-      })
-      let class_list = "saved_graph ";
-      if (this.state.selected_index === -2) {
-         class_list += "selected";
-      }
-      else {
-         class_list += "hoverable";
-      }
-      return (
-         <div className="graph_menu">
-            <div className="saved_graphs_container">
-               <h2 className="margin_bottom">Saved Graphs:</h2>
-               {graph_items}
-               <div id="add_new_graph_button" className={class_list} onClick={() => {
-                  if (-2 != this.state.selected_index) {
-                     this.on_graph_click(-2);
-                  }
-               }}>
-                  <div className="flex_direction_row">
-                     <span>Add new</span>
-                     <svg viewBox="0 0 16 16" className="add_svg_icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z" />
-                        <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z" />
-                        <path fillRule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5z" />
-                     </svg>
-                  </div>
-                  <SlideDown className="my_slide_down">
-                     {
-                        this.state.selected_index === -2 &&
-                        <div className="create_graph_menu">
-                           <span>Graph name:</span>
-                           <div className="input-group">
-                              <input className="form-control" value={this.props.input_value} onChange={this.props.on_graph_add_value_change}>
-                              </input>
-                           </div>
-                           <button className="btn btn-primary" id="create_graph_btn" onClick={this.props.on_graph_add_submit}>
-                              Create
-                           </button>
-                        </div>
-                     }
-                  </SlideDown>
-
-               </div>
-            </div>
-         </div>
-      )
-   }
-}
-
 class Graph extends React.PureComponent {
    graph: any;
    node_list: any[];
@@ -455,7 +323,7 @@ class Graph extends React.PureComponent {
    weight_number_offset: number;
    constructor(props) {
       super(props);
-      this.graph = this.props.graph;
+      this.graph = this.props.graph.graph;
       this.state = {
          canvas_width: window.innerWidth * 0.9,
 
@@ -620,6 +488,198 @@ class Graph extends React.PureComponent {
       );
    }
 }
+class Canvas_mouse_position_tracker extends React.Component {
+   constructor(props) {
+      super(props);
+   }
+   render() {
+      return (
+         <div id="mouse_tracker">
+            <span>X: {this.props.x}</span>
+            <span>Y: {this.props.y}</span>
+         </div>
+      );
+   }
+}
+
+class Graph_choose_menu extends React.Component {
+   //elem.style.height = `${elem.scrollHeight}px`;
+   previous_graph_index: number;
+   previous_node_index: number;
+   constructor(props) {
+      super(props);
+      this.state = {
+         selected_graph_index: -1,
+         selected_node_index: -1
+      }
+      this.previous_graph_index = -1;
+      this.previous_node_index = -1;
+   }
+   on_graph_click = (index) => {
+      if (index != this.previous_graph_index) {
+         this.previous_graph_index = index;
+         this.previous_node_index = -1;
+         this.setState({
+            selected_graph_index: index,
+            selected_node_index: -1
+         })
+      }
+   }
+   on_node_click = (index) => {
+      if (index != this.previous_node_index) {
+         this.previous_node_index = index;
+         this.setState({
+            selected_node_index: index
+         })
+      }
+   }
+   on_input_change = (event) => {
+      this.setState({
+         graph_name: event.target.value
+      });
+   }
+   render() {
+      let graph_object_list = this.props.graph_object_list;
+
+      let graph_items = graph_object_list.map((graph_object, graph_index) => {
+         let graph_name = graph_object.name;
+         let class_list = "saved_graph ";
+         if (this.state.selected_graph_index === graph_index) {
+            class_list += "selected";
+         }
+         else {
+            class_list += "hoverable";
+         }
+         let graph = graph_object.graph;
+         let node_names = Object.keys(graph);
+         let class_list_second = "node_container ";
+         if (this.state.selected_node_index != -2) {
+            class_list_second += "hoverable "
+         }
+         else if (this.state.selected_node_index === -2) {
+            class_list_second += "selected ";
+         }
+         return (
+
+            <div className={class_list} key={graph_index} onClick={() => {
+               if (graph_index != this.state.selected_graph_index) {
+                  this.on_graph_click(graph_index);
+               }
+            }}>
+               <span>{graph_name}</span>
+               <SlideDown className="my_slide_down">
+                  {this.state.selected_graph_index === graph_index &&
+                     <div className="graph_details">
+                        <h4>Nodes:</h4>
+                        {
+                           node_names.map((name, node_index) => {
+                              let class_list = "node_container ";
+                              if (this.state.selected_node_index != node_index) {
+                                 class_list += "hoverable "
+                              }
+                              else if (this.state.selected_node_index === node_index) {
+                                 class_list += "selected";
+                              }
+                              return (
+
+                                 <div key={name} className={class_list}>
+                                    <span>{name}</span>
+                                 </div>
+
+
+                              )
+                           })
+
+                        }
+
+                        <div className={class_list_second} onClick={() => {
+                           if (-2 != this.state.selected_node_index) {
+                              this.on_node_click(-2);
+                           }
+                        }}>
+
+                           <div className="flex_direction_row">
+                              <span>Add new</span>
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16" className="add_node_svg_icon">
+                                 <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z" />
+                                 <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z" />
+                              </svg>
+                           </div>
+                           <SlideDown className="my_slide_down">
+                              {
+                                 this.state.selected_node_index === -2 &&
+                                 <div className="create_graph_menu">
+                                    <span>Node name:</span>
+                                    <div className="input-group">
+
+                                       <input className="form-control" value={this.props.new_node_input_value} onChange={this.props.on_node_add_value_change}>
+                                       </input>
+                                    </div>
+                                    <button className="btn btn-primary" id="create_graph_btn" onClick={() => {
+                                       this.props.on_node_add_submit(graph_index);
+                                    }}>
+                                       Create
+                                    </button>
+                                 </div>
+                              }
+                           </SlideDown>
+                        </div>
+
+
+                     </div>
+                  }
+               </SlideDown>
+
+            </div>
+         )
+      })
+      let class_list = "saved_graph ";
+      if (this.state.selected_graph_index === -2) {
+         class_list += "selected";
+      }
+      else {
+         class_list += "hoverable";
+      }
+      return (
+         <div className="graph_menu">
+            <div className="saved_graphs_container">
+               <h2 className="margin_bottom">Saved Graphs:</h2>
+               {graph_items}
+               <div id="add_new_graph_button" className={class_list} onClick={() => {
+                  if (-2 != this.state.selected_graph_index) {
+                     this.on_graph_click(-2);
+                  }
+               }}>
+                  <div className="flex_direction_row">
+                     <span>Add new</span>
+                     <svg viewBox="0 0 16 16" className="add_svg_icon" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 0h10a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2v-1h1v1a1 1 0 0 0 1 1h10a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H3a1 1 0 0 0-1 1v1H1V2a2 2 0 0 1 2-2z" />
+                        <path d="M1 5v-.5a.5.5 0 0 1 1 0V5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0V8h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1zm0 3v-.5a.5.5 0 0 1 1 0v.5h.5a.5.5 0 0 1 0 1h-2a.5.5 0 0 1 0-1H1z" />
+                        <path fillRule="evenodd" d="M8 5.5a.5.5 0 0 1 .5.5v1.5H10a.5.5 0 0 1 0 1H8.5V10a.5.5 0 0 1-1 0V8.5H6a.5.5 0 0 1 0-1h1.5V6a.5.5 0 0 1 .5-.5z" />
+                     </svg>
+                  </div>
+                  <SlideDown className="my_slide_down">
+                     {
+                        this.state.selected_graph_index === -2 &&
+                        <div className="create_graph_menu">
+                           <span>Graph name:</span>
+                           <div className="input-group">
+                              <input className="form-control" value={this.props.new_graph_input_value} onChange={this.props.on_graph_add_value_change}>
+                              </input>
+                           </div>
+                           <button className="btn btn-primary" id="create_graph_btn" onClick={this.props.on_graph_add_submit}>
+                              Create
+                           </button>
+                        </div>
+                     }
+                  </SlideDown>
+
+               </div>
+            </div>
+         </div>
+      )
+   }
+}
 
 class App extends React.Component {
    canvas_x: number;
@@ -628,8 +688,8 @@ class App extends React.Component {
    constructor(props) {
       super(props);
       let graph_object_list = get_graph_object_list();
-      console.log(graph_object_list);
       
+
       this.state = {
          canvas_mouse_pos: {
             x: 0,
@@ -637,7 +697,8 @@ class App extends React.Component {
          },
          graph_object_list: graph_object_list,
          should_display_menu: true,
-         new_graph_name: ""
+         new_graph_name: "",
+         new_node_name: ""
       };
    }
    on_canvas_mouse_move = (e) => {
@@ -652,18 +713,18 @@ class App extends React.Component {
    on_graph_add_submit = () => {
       let name = this.state.new_graph_name;
       let is_name_found = false;
-      for(let i = 0; i < this.state.graph_object_list.length; i += 1){
+      for (let i = 0; i < this.state.graph_object_list.length; i += 1) {
          let current_object = this.state.graph_object_list[i];
          let scoped_name = current_object.name;
-         if(scoped_name === name){
+         if (scoped_name === name) {
             is_name_found = true;
             break;
          }
       }
-      if(is_name_found === true){
+      if (is_name_found === true) {
          alert("Graph with selected name already exists! Please choose a different name.");
       }
-      else{
+      else {
          let new_object = {
             name: name,
             graph: {
@@ -674,7 +735,8 @@ class App extends React.Component {
          combined_object.push(new_object);
          set_graph_object_list(combined_object);
          this.setState({
-            graph_object_list: combined_object
+            graph_object_list: combined_object,
+            new_graph_name: ""
          });
 
       }
@@ -682,6 +744,38 @@ class App extends React.Component {
    on_graph_add_value_change = (event) => {
       this.setState({
          new_graph_name: event.target.value
+      })
+   }
+   on_node_add_submit = (graph_index) => {
+      let new_name = this.state.new_node_name;
+      let graph = this.state.graph_object_list[graph_index].graph;
+      let node_names = Object.keys(graph);
+      let is_name_found = false;
+      for(let i = 0; i < node_names.length; i += 1){
+         let current_name = node_names[i];
+         if(current_name === new_name){
+            is_name_found = true;
+            break;
+         }
+      }
+      if(is_name_found){
+         alert("Node with selected name already exists! Please choose a different name.");
+      }
+      else{
+         let new_graph_object_list = this.state.graph_object_list;
+         let new_graph_object = new_graph_object_list[graph_index];
+         new_graph_object.graph[new_name] = {};
+         new_graph_object_list[graph_index] = new_graph_object;
+         set_graph_object_list(new_graph_object_list);
+         this.setState({
+            graph_object_list: new_graph_object_list,
+            new_node_name: ""
+         });
+      }
+   }
+   on_node_add_value_change = (event) => {
+      this.setState({
+         new_node_name: event.target.value
       })
    }
    render() {
@@ -694,11 +788,19 @@ class App extends React.Component {
                      x={this.state.canvas_mouse_pos.x}
                      y={this.state.canvas_mouse_pos.y}
                   />
-                  <Graph graph={this.state.graph_list[0]} onMouseMove={this.on_canvas_mouse_move} />
+                  <Graph graph={this.state.graph_object_list[0]} onMouseMove={this.on_canvas_mouse_move} />
                </div>
             }
             {this.state.should_display_menu === true &&
-               <Graph_choose_menu graph_object_list={this.state.graph_object_list} on_graph_add_submit={this.on_graph_add_submit} on_graph_add_value_change={this.on_graph_add_value_change} input_value={this.state.new_graph_name} />
+               <Graph_choose_menu 
+               graph_object_list={this.state.graph_object_list} 
+               on_graph_add_submit={this.on_graph_add_submit} 
+               on_graph_add_value_change={this.on_graph_add_value_change} 
+               new_graph_input_value={this.state.new_graph_name} 
+               on_node_add_submit={this.on_node_add_submit}
+               on_node_add_value_change={this.on_node_add_value_change}
+               new_node_input_value={this.state.new_node_name}
+               />
             }
 
          </div>
