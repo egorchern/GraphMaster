@@ -578,7 +578,7 @@ class Graph_choose_menu extends React.Component {
                <SlideDown className="my_slide_down">
                   {this.state.selected_graph_index === graph_index &&
                      <div className="graph_details">
-                        <h4>Nodes:</h4>
+                        <h4>Nodes</h4>
                         {
                            node_names.map((name, node_index) => {
                               let class_list = "node_container ";
@@ -590,8 +590,40 @@ class Graph_choose_menu extends React.Component {
                               }
                               return (
 
-                                 <div key={name} className={class_list}>
+                                 <div key={name} className={class_list} onClick={() => {
+                                    
+                                    if (this.state.selected_node_index != node_index) {
+                                       this.on_node_click(node_index);
+                                    }
+                                 }}>
+                                    {
+                                       this.state.selected_node_index === node_index && 
+                                       <img src={assets.delete_icon} className="delete_icon smaller" onClick={() => {
+                                          this.props.on_node_delete_click(graph_index, node_index);
+                                       }}>
+                                       </img>
+                                    }
                                     <span>{name}</span>
+                                    <SlideDown className="my_slide_down">
+                                       {
+                                          this.state.selected_node_index === node_index &&
+                                          <div className="node_details">
+                                             <span>Edges/Connections</span>
+                                             <div className="edges_container">
+                                                <div className="edge_container">
+                                                   <span>To node: B</span>
+                                                   <span>Weight: 48</span>
+                                                   <span>Biderectional</span>
+                                                </div>
+                                                <div className="edge_container">
+                                                   <span>To node: B</span>
+                                                   <span>Weight: 48</span>
+                                                   <span>Biderectional</span>
+                                                </div>
+                                             </div>
+                                          </div>
+                                       }
+                                    </SlideDown>
                                  </div>
 
 
@@ -651,7 +683,7 @@ class Graph_choose_menu extends React.Component {
       return (
          <div className="graph_menu">
             <div className="saved_graphs_container">
-               <h2 className="margin_bottom">Saved Graphs:</h2>
+               <h2 className="margin_bottom">Saved Graphs</h2>
                {graph_items}
                <div id="add_new_graph_button" className={class_list} onClick={() => {
                   if (-2 != this.state.selected_graph_index) {
@@ -794,6 +826,26 @@ class App extends React.Component {
          graph_object_list: new_graph_object_list
       })
    }
+   on_node_delete_click = (graph_index, node_index) => {
+      let new_graph_object_list = this.state.graph_object_list;
+      let scoped_graph = new_graph_object_list[graph_index].graph;
+      let node_names = Object.keys(scoped_graph);
+      let to_delete_name = node_names[node_index]
+      let new_graph = {
+
+      };
+      node_names.forEach(name => {
+         if(name != to_delete_name){
+            new_graph[name] = scoped_graph[name]; 
+         }
+      });
+      new_graph_object_list[graph_index].graph = new_graph;
+      set_graph_object_list(new_graph_object_list);
+      this.setState({
+         graph_object_list: new_graph_object_list
+      })
+
+   }
    render() {
 
       return (
@@ -817,6 +869,7 @@ class App extends React.Component {
                on_node_add_value_change={this.on_node_add_value_change}
                new_node_input_value={this.state.new_node_name}
                on_graph_delete_click={this.on_graph_delete_click}
+               on_node_delete_click={this.on_node_delete_click}
                />
             }
 

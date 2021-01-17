@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,700;1,400;1,700&family=Roboto:ital,wght@0,400;0,500;1,400;1,500&display=swap");
 $primary_hover_color: hsl(203, 84%, 60%);
 $secondary_hover_color: hsl(45, 100%, 49%);
+$third_hover_color: hsl(132, 85%, 49%);
 html,
 body {
     width: 100%;
@@ -82,6 +83,17 @@ body {
     }
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
 }
+.node_details{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    span{
+        font-size: 1.25rem;
+    }
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+}
 .my_slide_down{
     margin-top: 6px;
     width: 95%;
@@ -119,10 +131,10 @@ body {
     align-items: center;
 }
 .saved_graph.hoverable:hover{
-    box-shadow: 0px 0px 6px 3px $primary_hover_color;
+    box-shadow: 0px 0px 5px 3px $primary_hover_color;
 }
 .saved_graph.selected{
-    box-shadow: 0px 0px 6px 3px $primary_hover_color;
+    box-shadow: 0px 0px 5px 3px $primary_hover_color;
     cursor: default;
 }
 .node_container{
@@ -132,6 +144,7 @@ body {
     align-items: center;
     margin: 8px;
     padding: 10px;
+    position: relative;
     width: 100%;
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
 }
@@ -139,11 +152,27 @@ body {
     cursor: pointer;
 }
 .node_container.hoverable:hover{
-    box-shadow: 0px 0px 6px 3px $secondary_hover_color;
+    box-shadow: 0px 0px 5px 3px $secondary_hover_color;
 }
 .node_container.selected{
-    box-shadow: 0px 0px 6px 3px $secondary_hover_color;
+    box-shadow: 0px 0px 5px 3px $secondary_hover_color;
     cursor: default;
+}
+.edges_container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+.edge_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 8px;
+    padding: 10px;
+    width: 50%;
 }
 .margin_bottom{
     margin-bottom: 25px;
@@ -163,8 +192,14 @@ body {
     right: 15px;
     cursor: pointer;
 }
+.delete_icon.smaller{
+    max-width: 25px;
+}
 .delete_icon:hover{
     box-shadow: 0px 0px 6px 3px $secondary_hover_color;
+}
+.delete_icon.smaller:hover{
+    box-shadow: 0px 0px 6px 3px $third_hover_color;
 }
 .add_node_svg_icon{
     margin-left: 8px;
