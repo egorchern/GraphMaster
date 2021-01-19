@@ -171,6 +171,7 @@ body {
     justify-content: center;
     align-items: center;
     margin: 8px;
+    position: relative;
     padding: 10px;
     width: 50%;
     cursor: pointer;
@@ -202,6 +203,9 @@ body {
 }
 .delete_icon.smaller{
     max-width: 25px;
+}
+.delete_icon.smallest{
+    max-width: 20px;
 }
 .delete_icon:hover{
     box-shadow: 0px 0px 6px 3px $secondary_hover_color;

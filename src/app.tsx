@@ -658,6 +658,14 @@ class Graph_choose_menu extends React.Component {
                                       <div className={list} key={edge_name} onClick={() => {
                                         this.on_edge_click(edge_index);
                                       }}>
+                                        {
+                                          this.state.selected_edge_index === edge_index &&
+                                          <img src={assets.delete_icon} className="delete_icon smallest" onClick={() => {
+                                            this.props.on_edge_delete_click(graph_index, name, edge_name);
+                                          }}>
+                                          </img>
+                                        }
+                                        
                                         <span>To node: {edge_name}</span>
                                         <span>Weight: {graph[node_names[node_index]][edge_name]}</span>
                                         <span>Directional: {String(is_directional)}</span>
@@ -775,15 +783,15 @@ class App extends React.Component {
     super(props);
     let graph_object_list = get_graph_object_list();
     
-    graph_object_list.push({
+    graph_object_list = [{
       name: "Sample33",
       graph: {
         A: {B: 3, C: 6},
         B: {A: 3, C: 8},
-        C: {B: 8}
+        C: {B: 8, A: 6}
       }
-    })
-
+    }]
+    
     this.state = {
       canvas_mouse_pos: {
         x: 0,
@@ -795,6 +803,58 @@ class App extends React.Component {
       new_node_name: ""
     };
     
+  }
+  delete_edge = (graph, start_node_name, end_node_name) => {
+    let new_graph = graph;
+    let node_names = Object.keys(new_graph);
+    let old_edge_object = new_graph[start_node_name];
+    let edge_names = Object.keys(old_edge_object);
+    let new_edge_object = {};
+    for(let i = 0; i < edge_names.length; i += 1){
+      if(edge_names[i] != end_node_name){
+        new_edge_object[edge_names[i]] = old_edge_object[edge_names[i]];
+      }
+    }
+    new_graph[start_node_name] = new_edge_object;
+    old_edge_object = new_graph[end_node_name];
+    if(old_edge_object != undefined){
+      edge_names = Object.keys(old_edge_object);
+
+      new_edge_object = {};
+      for(let i = 0; i < edge_names.length; i += 1){
+        if(edge_names[i] != start_node_name){
+          new_edge_object[edge_names[i]] = old_edge_object[edge_names[i]];
+        }
+      }
+      new_graph[end_node_name] = new_edge_object;
+    }
+    
+    return new_graph;
+  }
+  delete_residiual_edges = (graph, to_delete_node_name) => {
+    let node_names = Object.keys(graph);
+    let new_graph = graph;
+    
+    for(let i = 0; i < node_names.length; i += 1){
+      let node_name = node_names[i];
+      let edge_object = new_graph[node_name];
+      if(edge_object === undefined){
+        edge_object = {};
+      }
+      let edge_names = Object.keys(edge_object);
+      
+      for(let j = 0; j < edge_names.length; j += 1){
+        let edge_name = edge_names[j];
+        
+        if(edge_name === to_delete_node_name){
+          
+          new_graph = this.delete_edge(new_graph, node_name, edge_name);
+          
+        }
+      }
+    }
+    console.log(new_graph);
+    return new_graph;
   }
   on_canvas_mouse_move = (e) => {
     let pos = getMousePos(e, canvas);
@@ -894,6 +954,9 @@ class App extends React.Component {
         new_graph[name] = scoped_graph[name];
       }
     });
+    console.log(new_graph);
+    new_graph = this.delete_residiual_edges(new_graph, to_delete_name);
+    console.log(new_graph);
     new_graph_object_list[graph_index].graph = new_graph;
     set_graph_object_list(new_graph_object_list);
     this.setState({
@@ -901,14 +964,12 @@ class App extends React.Component {
     })
 
   }
-  on_edge_add_submit = (graph_index, start_node_index, end_node_index, weight, directional) => {
+  on_edge_add_submit = (graph_index, start_node_name, end_node_name, weight, directional) => {
     let new_graph_object_list = this.state.graph_object_list;
     let new_graph_object = new_graph_object_list[graph_index];
     let new_graph = new_graph_object.graph;
     let node_names = Object.keys(new_graph);
-    let start_node_name = node_names[start_node_index];
-    let end_node_name = node_names[end_node_index];
-    let new_edge_object = new_graph[start_node_index];
+    let new_edge_object = new_graph[start_node_name];
     if(new_edge_object === undefined){
       new_edge_object = {};
     }
@@ -932,32 +993,16 @@ class App extends React.Component {
       graph_object_list: new_graph_object_list
     })
   }
-  on_edge_delete_click = (graph_index, start_node_index, end_node_index) => {
+  on_edge_delete_click = (graph_index, start_node_name, end_node_name) => {
     let new_graph_object_list = this.state.graph_object_list;
     let new_graph_object = new_graph_object_list[graph_index];
-    let new_graph = new_graph_object.graph;
-    let node_names = Object.keys(new_graph);
-    let start_node_name = node_names[start_node_index];
-    let end_node_name = node_names[end_node_index];
-    let old_edge_object = new_graph[start_node_name];
-    let edge_names = Object.keys(old_edge_object);
-    let new_edge_object = {};
-    for(let i = 0; i < edge_names.length; i += 1){
-      if(edge_names[i] != end_node_name){
-        new_edge_object[edge_names[i]] = old_edge_object[edge_names[i]];
-      }
-    }
-    new_graph[start_node_name] = new_edge_object;
-    old_edge_object = new_graph[end_node_name];
-    edge_names = Object.keys(old_edge_object);
-    new_edge_object = {};
-    for(let i = 0; i < edge_names.length; i += 1){
-      if(edge_names[i] != start_node_name){
-        new_edge_object[edge_names[i]] = old_edge_object[edge_names[i]];
-      }
-    }
-    new_graph[end_node_name] = new_edge_object;
-    console.log(new_graph);
+    let new_graph = this.delete_edge(new_graph_object.graph, start_node_name, end_node_name);
+    new_graph_object.graph = new_graph;
+    new_graph_object_list[graph_index] = new_graph_object;
+    set_graph_object_list(new_graph_object_list);
+    this.setState({
+      graph_object_list: new_graph_object_list
+    })
 
   }
   render() {
@@ -984,6 +1029,7 @@ class App extends React.Component {
             new_node_input_value={this.state.new_node_name}
             on_graph_delete_click={this.on_graph_delete_click}
             on_node_delete_click={this.on_node_delete_click}
+            on_edge_delete_click={this.on_edge_delete_click}
           />
         }
 
