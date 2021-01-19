@@ -25,6 +25,17 @@ function get_graph_object_list() {
   return list;
 }
 
+function is_edge_directional(graph, start_node_name, end_node_name) {
+  let end_node_edges = graph[end_node_name];
+  let edge_nodes_names = Object.keys(end_node_edges);
+  if (edge_nodes_names.includes(start_node_name)) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}
+
 function set_graph_object_list(graph_object_list) {
   localStorage.setItem("graph_object_list", JSON.stringify(graph_object_list, null, 4));
 }
@@ -158,6 +169,7 @@ function get_random_int(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+
 class Edge {
   start_x: any;
   end_x: any;
@@ -273,6 +285,7 @@ class Edge {
   }
 }
 
+
 class Node {
   center_x: any;
   center_y: any;
@@ -308,6 +321,8 @@ class Node {
   }
 
 }
+
+
 class Graph extends React.PureComponent {
   graph: any;
   node_list: any[];
@@ -488,6 +503,8 @@ class Graph extends React.PureComponent {
     );
   }
 }
+
+
 class Canvas_mouse_position_tracker extends React.Component {
   constructor(props) {
     super(props);
@@ -502,34 +519,50 @@ class Canvas_mouse_position_tracker extends React.Component {
   }
 }
 
+
 class Graph_choose_menu extends React.Component {
   //elem.style.height = `${elem.scrollHeight}px`;
   previous_graph_index: number;
   previous_node_index: number;
+  previous_edge_index: number;
   constructor(props) {
     super(props);
     this.state = {
       selected_graph_index: -1,
-      selected_node_index: -1
+      selected_node_index: -1,
+      selected_edge_index: -1
     }
     this.previous_graph_index = -1;
     this.previous_node_index = -1;
+    this.previous_edge_index = -1;
   }
   on_graph_click = (index) => {
     if (index != this.previous_graph_index) {
       this.previous_graph_index = index;
       this.previous_node_index = -1;
+      this.previous_edge_index = -1;
       this.setState({
         selected_graph_index: index,
-        selected_node_index: -1
+        selected_node_index: -1,
+        selected_edge_index: -1
       })
     }
   }
   on_node_click = (index) => {
     if (index != this.previous_node_index) {
       this.previous_node_index = index;
+      this.previous_edge_index = -1;
       this.setState({
-        selected_node_index: index
+        selected_node_index: index,
+        selected_edge_index: -1
+      })
+    }
+  }
+  on_edge_click = (index) => {
+    if (index != this.previous_edge_index) {
+      this.previous_edge_index = index;
+      this.setState({
+        selected_edge_index: index
       })
     }
   }
@@ -613,7 +646,23 @@ class Graph_choose_menu extends React.Component {
                               <div className="edges_container">
                                 {
                                   Object.keys(graph[node_names[node_index]]).map((edge_name, edge_index) => {
-                                    console.log(edge_name);
+                                    let is_directional = is_edge_directional(graph, name, edge_name);
+                                    let list = "edge_container ";
+                                    if(edge_index === this.state.selected_edge_index){
+                                      list += "selected ";
+                                    }
+                                    else{
+                                      list += "hoverable ";
+                                    }
+                                    return(
+                                      <div className={list} key={edge_name} onClick={() => {
+                                        this.on_edge_click(edge_index);
+                                      }}>
+                                        <span>To node: {edge_name}</span>
+                                        <span>Weight: {graph[node_names[node_index]][edge_name]}</span>
+                                        <span>Directional: {String(is_directional)}</span>
+                                      </div>
+                                    )
                                   })
                                 }
                               </div>
@@ -717,6 +766,7 @@ class Graph_choose_menu extends React.Component {
   }
 }
 
+
 class App extends React.Component {
   canvas_x: number;
   canvas_y: number;
@@ -725,6 +775,14 @@ class App extends React.Component {
     super(props);
     let graph_object_list = get_graph_object_list();
     
+    graph_object_list.push({
+      name: "Sample33",
+      graph: {
+        A: {B: 3, C: 6},
+        B: {A: 3, C: 8},
+        C: {B: 8}
+      }
+    })
 
     this.state = {
       canvas_mouse_pos: {
@@ -874,7 +932,34 @@ class App extends React.Component {
       graph_object_list: new_graph_object_list
     })
   }
-  
+  on_edge_delete_click = (graph_index, start_node_index, end_node_index) => {
+    let new_graph_object_list = this.state.graph_object_list;
+    let new_graph_object = new_graph_object_list[graph_index];
+    let new_graph = new_graph_object.graph;
+    let node_names = Object.keys(new_graph);
+    let start_node_name = node_names[start_node_index];
+    let end_node_name = node_names[end_node_index];
+    let old_edge_object = new_graph[start_node_name];
+    let edge_names = Object.keys(old_edge_object);
+    let new_edge_object = {};
+    for(let i = 0; i < edge_names.length; i += 1){
+      if(edge_names[i] != end_node_name){
+        new_edge_object[edge_names[i]] = old_edge_object[edge_names[i]];
+      }
+    }
+    new_graph[start_node_name] = new_edge_object;
+    old_edge_object = new_graph[end_node_name];
+    edge_names = Object.keys(old_edge_object);
+    new_edge_object = {};
+    for(let i = 0; i < edge_names.length; i += 1){
+      if(edge_names[i] != start_node_name){
+        new_edge_object[edge_names[i]] = old_edge_object[edge_names[i]];
+      }
+    }
+    new_graph[end_node_name] = new_edge_object;
+    console.log(new_graph);
+
+  }
   render() {
 
     return (
