@@ -31,6 +31,7 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    
 }
 .graph_menu{
     /*
@@ -124,11 +125,28 @@ body {
 .saved_graph.hoverable{
     cursor: pointer;
 }
+.edge_create_grid{
+    display: grid;
+    width: 95%;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 8px;
+    *{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.1rem;
+    }
+}
+.text_align_center{
+    text-align: center;
+}
 .flex_direction_row{
     display: flex;
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    width: 100%;
 }
 .saved_graph.hoverable:hover{
     box-shadow: 0px 0px 5px 3px $primary_hover_color;
@@ -163,7 +181,12 @@ body {
     flex-direction: row;
     justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
     width: 100%;
+    /*
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    */
 }
 .edge_container{
     display: flex;
@@ -173,7 +196,7 @@ body {
     margin: 8px;
     position: relative;
     padding: 10px;
-    width: 50%;
+    width: 45%;
     cursor: pointer;
 }
 .edge_container.hoverable:hover{
@@ -217,6 +240,11 @@ body {
     margin-left: 8px;
     width: 1.5rem;
     height: 1.5rem;
+}
+.add_edge_svg_icon{
+    margin-left: 8px;
+    width: 1.8rem;
+    height: 1.8rem;
 }
 .create_graph_menu{
     width: 95%;
