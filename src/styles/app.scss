@@ -2,6 +2,11 @@
 $primary_hover_color: hsl(203, 84%, 60%);
 $secondary_hover_color: hsl(45, 100%, 49%);
 $third_hover_color: hsl(132, 85%, 49%);
+$fourth_hover_color: black;
+$tier_four_font_size: max(20px, calc(1rem + 0.9vw));
+$tier_three_font_size: max(18px, calc(1rem + 0.7vw));
+$tier_two_font_size: max(16px, calc(1rem + 0.5vw));
+$tier_one_font_size: max(14px, calc(1rem + 0.3vw));
 html,
 body {
     width: 100%;
@@ -13,6 +18,22 @@ body {
     font-family: "Lato", "Roboto", sans-serif !important;
     word-break: break-word;
     color: black;
+}
+@media (max-width: 768px){
+    :root{
+        --slide_down_width: 100%;
+        --edge_container_width: 100%;
+        --menu_width: 100%;
+        --button_width: 75%;
+    }
+}
+@media (min-width: 768.01px){
+    :root{
+        --slide_down_width: 95%;
+        --edge_container_width: 45%;
+        --menu_width: 90%;
+        --button_width: 40%;
+    }
 }
 #root {
     width: 100%;
@@ -31,7 +52,9 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 10px;
 }
 .graph_menu{
     /*
@@ -46,8 +69,15 @@ body {
     
     border-radius: 12px;
     padding: 12px;
-
-    width: 90%;
+    
+    overflow: auto;
+    width: var(--menu_width);
+    .btn{
+        margin-top: 20px;
+        width: var(--button_width);
+        max-width: 165px;
+        min-width: 120px;
+    }
     max-width: 1000px;
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
 }
@@ -70,7 +100,7 @@ body {
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
     position: relative;
     span{
-        font-size: 1.5rem;
+        font-size: $tier_four_font_size;
     }
 }
 .graph_details{
@@ -79,8 +109,9 @@ body {
     justify-content: center;
     align-items: center;
     width: 100%;
+    
     span{
-        font-size: 1.25rem;
+        font-size: $tier_three_font_size;
     }
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
 }
@@ -91,13 +122,13 @@ body {
     align-items: center;
     width: 100%;
     span{
-        font-size: 1.25rem;
+        font-size: $tier_two_font_size;
     }
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
 }
 .my_slide_down{
     margin-top: 6px;
-    width: 95%;
+    width: var(--slide_down_width);
     border-top: 2px solid hsl(0, 0%, 85%);
     padding-top: 6px;
     display: flex;
@@ -135,7 +166,7 @@ body {
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        font-size: 1.1rem;
+        font-size: $tier_one_font_size;
     }
 }
 .text_align_center{
@@ -196,7 +227,7 @@ body {
     margin: 8px;
     position: relative;
     padding: 10px;
-    width: 45%;
+    width: var(--edge_container_width);
     cursor: pointer;
 }
 .edge_container.hoverable:hover{
@@ -236,6 +267,9 @@ body {
 .delete_icon.smaller:hover{
     box-shadow: 0px 0px 6px 3px $third_hover_color;
 }
+.delete_icon.smallest:hover{
+    box-shadow: 0px 0px 6px 3px $fourth_hover_color;
+}
 .add_node_svg_icon{
     margin-left: 8px;
     width: 1.5rem;
@@ -259,12 +293,7 @@ body {
     .form-control{
         font-size: 1.25rem;
     }
-    .btn{
-        margin-top: 20px;
-        width: 40%;
-        max-width: 165px;
-        min-width: 90px;
-    }
+    
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
 }
 #canvas{

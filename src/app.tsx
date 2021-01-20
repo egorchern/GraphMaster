@@ -647,7 +647,7 @@ class Graph_choose_menu extends React.Component {
           <SlideDown className="my_slide_down">
             {this.state.selected_graph_index === graph_index &&
               <div className="graph_details">
-                <h4>Nodes</h4>
+                <span>Nodes</span>
                 {
                   node_names.map((name, node_index) => {
                     let class_list = "node_container ";
