@@ -9,7 +9,7 @@ let distance_multiple = 0.57;
 let edge_width = 1;
 
 const pi = Math.PI;
-
+//TODO: Animations, display button;
 function get_graph_object_list() {
   let list = localStorage.getItem("graph_object_list");
 
@@ -44,11 +44,17 @@ function is_edge_directional(graph, start_node_name, end_node_name) {
   let end_node_edges = graph[end_node_name];
   let edge_nodes_names = Object.keys(end_node_edges);
   if (edge_nodes_names.includes(start_node_name)) {
-    return false;
+    let start_weight = graph[start_node_name][end_node_name];
+    let end_weight = end_node_edges[start_node_name];
+    console.log(start_weight, end_weight);
+    if(start_weight != end_weight){
+      return true;
+    }
+    else{
+      return false;
+    }
   }
-  else {
-    return true;
-  }
+  return true;
 }
 
 function set_graph_object_list(graph_object_list) {
@@ -210,7 +216,7 @@ class Edge {
   }
   draw() {
     let weight_number_offset = this.weight_number_offset;
-    // TODO this needs to be scalable as well.
+    
     ctx.save();
     ctx.beginPath();
     ctx.strokeStyle = "hsl(0, 0%, 10%)";
@@ -546,6 +552,8 @@ class Graph_choose_menu extends React.Component {
       selected_graph_index: -1,
       selected_node_index: -1,
       selected_edge_index: -1,
+      new_node_input_value: "",
+      new_graph_input_value: "",
       edge_add_target_node_value: "",
       edge_add_weight_value: "",
       edge_add_directionality_value: ""
@@ -597,6 +605,16 @@ class Graph_choose_menu extends React.Component {
   on_edge_add_directionality_value_change = (event) => {
     this.setState({
       edge_add_directionality_value: event.target.value
+    })
+  }
+  on_node_add_value_change = (event) => {
+    this.setState({
+      new_node_input_value: event.target.value
+    })
+  }
+  on_graph_add_value_change = (event) => {
+    this.setState({
+      new_graph_input_value: event.target.value
     })
   }
   render() {
@@ -759,7 +777,7 @@ class Graph_choose_menu extends React.Component {
                                         </div>
                                         
                                         <button className="btn btn-primary" id="create_graph_btn" onClick={() => {
-                                          this.props.on_edge_add_submit(graph_index, name, this.state.edge_add_target_node_value, Number(this.state.edge_add_weight_value), this.state.edge_add_directionality_value);
+                                          this.props.on_edge_add_submit(graph_index, name, this.state.edge_add_target_node_value, this.state.edge_add_weight_value, this.state.edge_add_directionality_value);
                                         }}>
                                           Create
                                         </button>
@@ -800,14 +818,14 @@ class Graph_choose_menu extends React.Component {
                         <span>Node name:</span>
                         <div className="input-group">
 
-                          <input className="form-control" value={this.props.new_node_input_value} onChange={this.props.on_node_add_value_change}>
+                          <input className="form-control" value={this.state.new_node_input_value} onChange={this.on_node_add_value_change}>
                           </input>
                         </div>
                         <button className="btn btn-primary" id="create_graph_btn" onClick={() => {
-                          this.props.on_node_add_submit(graph_index);
+                          this.props.on_node_add_submit(graph_index, this.state.new_node_input_value);
                         }}>
                           Create
-                                    </button>
+                        </button>
                       </div>
                     }
                   </SlideDown>
@@ -852,12 +870,14 @@ class Graph_choose_menu extends React.Component {
                 <div className="create_graph_menu">
                   <span>Graph name:</span>
                   <div className="input-group">
-                    <input className="form-control" value={this.props.new_graph_input_value} onChange={this.props.on_graph_add_value_change}>
+                    <input className="form-control" value={this.state.new_graph_input_value} onChange={this.on_graph_add_value_change}>
                     </input>
                   </div>
-                  <button className="btn btn-primary" id="create_graph_btn" onClick={this.props.on_graph_add_submit}>
+                  <button className="btn btn-primary" id="create_graph_btn" onClick={() => {
+                    this.props.on_graph_add_submit(this.state.new_graph_input_value);
+                  }}>
                     Create
-                           </button>
+                  </button>
                 </div>
               }
             </SlideDown>
@@ -950,74 +970,79 @@ class App extends React.Component {
       },
     });
   };
-  on_graph_add_submit = () => {
-    let name = this.state.new_graph_name;
-    let is_name_found = false;
-    for (let i = 0; i < this.state.graph_object_list.length; i += 1) {
-      let current_object = this.state.graph_object_list[i];
-      let scoped_name = current_object.name;
-      if (scoped_name === name) {
-        is_name_found = true;
-        break;
-      }
+  on_graph_add_submit = (new_graph_name) => {
+    let name = new_graph_name;
+    if(name === ""){
+      alert("Graph name field is empty!");
     }
-    if (is_name_found === true) {
-      alert("Graph with selected name already exists! Please choose a different name.");
-    }
-    else {
-      let new_object = {
-        name: name,
-        graph: {
-
+    else{
+      let is_name_found = false;
+      for (let i = 0; i < this.state.graph_object_list.length; i += 1) {
+        let current_object = this.state.graph_object_list[i];
+        let scoped_name = current_object.name;
+        if (scoped_name === name) {
+          is_name_found = true;
+          break;
         }
       }
-      let combined_object = this.state.graph_object_list;
-      combined_object.push(new_object);
-      set_graph_object_list(combined_object);
-      this.setState({
-        graph_object_list: combined_object,
-        new_graph_name: ""
-      });
+      if (is_name_found === true) {
+        alert("Graph with selected name already exists! Please choose a different name.");
+      }
+      else {
+        let new_object = {
+          name: name,
+          graph: {
 
-    }
-  }
-  on_graph_add_value_change = (event) => {
-    this.setState({
-      new_graph_name: event.target.value
-    })
-  }
-  on_node_add_submit = (graph_index) => {
-    let new_name = this.state.new_node_name;
-    let graph = this.state.graph_object_list[graph_index].graph;
-    let node_names = Object.keys(graph);
-    let is_name_found = false;
-    for (let i = 0; i < node_names.length; i += 1) {
-      let current_name = node_names[i];
-      if (current_name === new_name) {
-        is_name_found = true;
-        break;
+          }
+        }
+        let combined_object = this.state.graph_object_list;
+        combined_object.push(new_object);
+        set_graph_object_list(combined_object);
+        this.setState({
+          graph_object_list: combined_object,
+          new_graph_name: ""
+        });
+
       }
     }
-    if (is_name_found) {
-      alert("Node with selected name already exists! Please choose a different name.");
-    }
-    else {
-      let new_graph_object_list = this.state.graph_object_list;
-      let new_graph_object = new_graph_object_list[graph_index];
-      new_graph_object.graph[new_name] = {};
-      new_graph_object_list[graph_index] = new_graph_object;
-      set_graph_object_list(new_graph_object_list);
-      this.setState({
-        graph_object_list: new_graph_object_list,
-        new_node_name: ""
-      });
-    }
+    
   }
-  on_node_add_value_change = (event) => {
-    this.setState({
-      new_node_name: event.target.value
-    })
+  
+  on_node_add_submit = (graph_index, new_node_name) => {
+
+    let new_name = new_node_name;
+    if(new_name === ""){
+      alert("Node name field is empty!");
+    }
+    else{
+      let graph = this.state.graph_object_list[graph_index].graph;
+      let node_names = Object.keys(graph);
+      let is_name_found = false;
+      for (let i = 0; i < node_names.length; i += 1) {
+        let current_name = node_names[i];
+        if (current_name === new_name) {
+          is_name_found = true;
+          break;
+        }
+      }
+      if (is_name_found) {
+        alert("Node with selected name already exists! Please choose a different name.");
+      }
+      else {
+        let new_graph_object_list = this.state.graph_object_list;
+        let new_graph_object = new_graph_object_list[graph_index];
+        new_graph_object.graph[new_name] = {};
+        new_graph_object_list[graph_index] = new_graph_object;
+        set_graph_object_list(new_graph_object_list);
+        this.setState({
+          graph_object_list: new_graph_object_list,
+          new_node_name: ""
+        });
+      }
+    }
+    
   }
+  
   on_graph_delete_click = (graph_index) => {
     let new_graph_object_list = this.state.graph_object_list;
     new_graph_object_list.splice(graph_index, 1);
@@ -1050,33 +1075,54 @@ class App extends React.Component {
 
   }
   on_edge_add_submit = (graph_index, start_node_name, end_node_name, weight, directional) => {
-    let new_graph_object_list = this.state.graph_object_list;
-    let new_graph_object = new_graph_object_list[graph_index];
-    let new_graph = new_graph_object.graph;
-    let node_names = Object.keys(new_graph);
-    let new_edge_object = new_graph[start_node_name];
-    if (new_edge_object === undefined) {
-      new_edge_object = {};
-    }
+    let re_positive_numbers_only = RegExp("^[1-9][0-9]*(\.[0-9]+)?$");
+    let weight_pass_bool = re_positive_numbers_only.test(String(weight));
+    let node_pass_bool = end_node_name != "";
+    let directional_pass_bool = directional != "";
+    if(weight_pass_bool === false || node_pass_bool === false || directional_pass_bool === false){
+      let error_text = "Following errors were discovered:\n";
+      if(weight_pass_bool === false){
+        error_text += "\nWeight field only allows positive numbers";
+      }
+      if(node_pass_bool === false){
+        error_text += "\nNo destination node selected";
+      }
+      if(directional_pass_bool === false){
+        error_text += "\nDirectionality value not selected";
+      }
+      alert(error_text);
 
-    new_edge_object[end_node_name] = weight;
-    new_graph[start_node_name] = new_edge_object;
-    if (directional === "False") {
-      new_edge_object = new_graph[end_node_name];
+    }
+    else{
+      let new_graph_object_list = this.state.graph_object_list;
+      let new_graph_object = new_graph_object_list[graph_index];
+      let new_graph = new_graph_object.graph;
+      let node_names = Object.keys(new_graph);
+      let new_edge_object = new_graph[start_node_name];
       if (new_edge_object === undefined) {
         new_edge_object = {};
       }
-      new_edge_object[start_node_name] = weight;
-      new_graph[end_node_name] = new_edge_object;
-    }
-    new_graph_object.graph = new_graph;
 
-    new_graph_object_list[graph_index] = new_graph_object;
+      new_edge_object[end_node_name] = weight;
+      new_graph[start_node_name] = new_edge_object;
+      if (directional === "False") {
+        new_edge_object = new_graph[end_node_name];
+        if (new_edge_object === undefined) {
+          new_edge_object = {};
+        }
+        new_edge_object[start_node_name] = weight;
+        new_graph[end_node_name] = new_edge_object;
+      }
+      new_graph_object.graph = new_graph;
+
+      new_graph_object_list[graph_index] = new_graph_object;
+      
+      set_graph_object_list(new_graph_object_list);
+      this.setState({
+        graph_object_list: new_graph_object_list
+      })
+    }
     
-    set_graph_object_list(new_graph_object_list);
-    this.setState({
-      graph_object_list: new_graph_object_list
-    })
   }
   on_edge_delete_click = (graph_index, start_node_name, end_node_name) => {
     let new_graph_object_list = this.state.graph_object_list;
@@ -1107,11 +1153,7 @@ class App extends React.Component {
           <Graph_choose_menu
             graph_object_list={this.state.graph_object_list}
             on_graph_add_submit={this.on_graph_add_submit}
-            on_graph_add_value_change={this.on_graph_add_value_change}
-            new_graph_input_value={this.state.new_graph_name}
             on_node_add_submit={this.on_node_add_submit}
-            on_node_add_value_change={this.on_node_add_value_change}
-            new_node_input_value={this.state.new_node_name}
             on_graph_delete_click={this.on_graph_delete_click}
             on_node_delete_click={this.on_node_delete_click}
             on_edge_delete_click={this.on_edge_delete_click}

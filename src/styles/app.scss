@@ -3,10 +3,10 @@ $primary_hover_color: hsl(203, 84%, 60%);
 $secondary_hover_color: hsl(45, 100%, 49%);
 $third_hover_color: hsl(132, 85%, 49%);
 $fourth_hover_color: black;
-$tier_four_font_size: max(20px, calc(1rem + 0.9vw));
-$tier_three_font_size: max(18px, calc(1rem + 0.7vw));
-$tier_two_font_size: max(16px, calc(1rem + 0.5vw));
-$tier_one_font_size: max(14px, calc(1rem + 0.3vw));
+$tier_four_font_size: min(max(20px, calc(1rem + 0.9vw)), 24px);
+$tier_three_font_size: min(max(18px, calc(1rem + 0.7vw)), 22px);
+$tier_two_font_size: min(max(16px, calc(1rem + 0.5vw)), 20px);
+$tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
 html,
 body {
     width: 100%;
