@@ -511,14 +511,17 @@ class Graph extends React.PureComponent {
 
   render() {
     return (
-
-      <canvas
-        id="canvas"
-        width={this.state.canvas_width}
-        height={this.state.canvas_height}
-        onMouseMove={this.props.onMouseMove}
-      >
-      </canvas>
+      <div>
+        <h1 className="text_align_center">{this.props.graph.name}</h1>
+        <canvas
+          id="canvas"
+          width={this.state.canvas_width}
+          height={this.state.canvas_height}
+          onMouseMove={this.props.onMouseMove}
+        >
+        </canvas>
+      </div>
+      
 
 
     );
@@ -617,6 +620,7 @@ class Graph_choose_menu extends React.Component {
       new_graph_input_value: event.target.value
     })
   }
+  
   render() {
     let graph_object_list = this.props.graph_object_list;
 
@@ -830,6 +834,11 @@ class Graph_choose_menu extends React.Component {
                     }
                   </SlideDown>
                 </div>
+                <button className="btn btn-primary display_graph_btn" onClick={() => {
+                  this.props.on_display_graph_click(this.state.selected_graph_index);
+                }}>
+                    Display
+                </button>
 
 
               </div>
@@ -883,6 +892,7 @@ class Graph_choose_menu extends React.Component {
             </SlideDown>
 
           </div>
+          
         </div>
       </div>
     )
@@ -905,9 +915,21 @@ class App extends React.Component {
       graph_object_list: graph_object_list,
       should_display_menu: true,
       new_graph_name: "",
-      new_node_name: ""
+      new_node_name: "",
+      selected_graph_index: -1
     };
     
+  }
+  on_display_graph_click = (graph_index) => {
+    if(graph_index === -1 && graph_index === -2){
+      alert("No graph is selected!");
+    }
+    else{
+      this.setState({
+        should_display_menu: false,
+        selected_graph_index: graph_index
+      })
+    }
   }
   delete_edge = (graph, start_node_name, end_node_name) => {
     let new_graph = graph;
@@ -1158,6 +1180,7 @@ class App extends React.Component {
             on_node_delete_click={this.on_node_delete_click}
             on_edge_delete_click={this.on_edge_delete_click}
             on_edge_add_submit={this.on_edge_add_submit}
+            on_display_graph_click={this.on_display_graph_click}
           />
         }
 

@@ -56,6 +56,9 @@ body {
     overflow-x: hidden;
     padding: 10px;
 }
+.display_graph_btn{
+    font-size: $tier_four_font_size;
+}
 .graph_menu{
     /*
     background-color: #85FFBD;
@@ -304,7 +307,7 @@ body {
     background-color: white;
 }
 #create_graph_btn{
-    font-size: 1.75rem;
+    font-size: $tier_four_font_size;
 }
 #mouse_tracker{
     position: fixed;
