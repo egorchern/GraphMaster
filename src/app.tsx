@@ -9,7 +9,7 @@ let distance_multiple = 0.57;
 let edge_width = 1;
 
 const pi = Math.PI;
-//TODO: Animations, display button;
+//TODO: Backbutton on graph display;
 function get_graph_object_list() {
   let list = localStorage.getItem("graph_object_list");
 
@@ -343,7 +343,20 @@ class Node {
 
 }
 
-
+class Back_button extends React.Component{
+  constructor(props){
+    super(props);
+  }
+  render(){
+    return(
+      <div onClick={this.props.onClick}>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" className="back_button_svg" viewBox="0 0 16 16">
+          <path fillRule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+        </svg>
+      </div>
+    )
+  }
+}
 class Graph extends React.PureComponent {
   graph: any;
   node_list: any[];
@@ -1158,6 +1171,11 @@ class App extends React.Component {
     })
 
   }
+  on_back_button_click = () => {
+    this.setState({
+      should_display_menu: true
+    })
+  }
   render() {
 
     return (
@@ -1168,7 +1186,10 @@ class App extends React.Component {
               x={this.state.canvas_mouse_pos.x}
               y={this.state.canvas_mouse_pos.y}
             />
-            <Graph graph={this.state.graph_object_list[0]} onMouseMove={this.on_canvas_mouse_move} />
+            <Graph graph={this.state.graph_object_list[this.state.selected_graph_index]} onMouseMove={this.on_canvas_mouse_move} />
+            <Back_button onClick={this.on_back_button_click}>
+
+            </Back_button>
           </div>
         }
         {this.state.should_display_menu === true &&

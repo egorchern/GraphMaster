@@ -1,0 +1,282 @@
+$primary_hover_color: hsl(203, 84%, 60%);
+$secondary_hover_color: hsl(45, 100%, 49%);
+$third_hover_color: hsl(132, 85%, 49%);
+$fourth_hover_color: black;
+$tier_four_font_size: min(max(20px, calc(1rem + 0.9vw)), 24px);
+$tier_three_font_size: min(max(18px, calc(1rem + 0.7vw)), 22px);
+$tier_two_font_size: min(max(16px, calc(1rem + 0.5vw)), 20px);
+$tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
+@media (max-width: 768px){
+    :root{
+        --slide_down_width: 100%;
+        --edge_container_width: 100%;
+        --menu_width: 100%;
+        --button_width: 75%;
+    }
+}
+@media (min-width: 768.01px){
+    :root{
+        --slide_down_width: 95%;
+        --edge_container_width: 45%;
+        --menu_width: 90%;
+        --button_width: 40%;
+    }
+}
+
+.display_graph_btn{
+    font-size: $tier_four_font_size;
+}
+.graph_menu{
+    /*
+    background-color: #85FFBD;
+    background-image: linear-gradient(45deg, #85FFBD 0%, #FFFB7D 100%);
+    
+    background-color: #8BC6EC;
+    background-image: linear-gradient(135deg, #8BC6EC 0%, #9599E2 100%);
+    */
+    background-color: white;
+    border: 2px solid #DFE1E6;
+    
+    border-radius: 12px;
+    padding: 12px;
+    
+    overflow: auto;
+    width: var(--menu_width);
+    .btn{
+        margin-top: 20px;
+        width: var(--button_width);
+        max-width: 165px;
+        min-width: 120px;
+    }
+    max-width: 1000px;
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+}
+.saved_graphs_container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.saved_graph{
+    margin: 8px;
+    padding: 10px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+    position: relative;
+    span{
+        font-size: $tier_four_font_size;
+    }
+}
+.graph_details{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    
+    span{
+        font-size: $tier_three_font_size;
+    }
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+}
+.node_details{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    span{
+        font-size: $tier_two_font_size;
+    }
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+}
+.my_slide_down{
+    margin-top: 6px;
+    width: var(--slide_down_width);
+    border-top: 2px solid hsl(0, 0%, 85%);
+    padding-top: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.react-slidedown {
+    height: 0;
+    
+    transition-property: none;
+    transition-duration: 0.4s;
+    transition-timing-function: ease-in-out;
+    
+}
+
+.react-slidedown.transitioning {
+    overflow-y: hidden;
+}
+
+.react-slidedown.closed {
+    display: none;
+}
+
+.saved_graph.hoverable{
+    cursor: pointer;
+}
+.edge_create_grid{
+    display: grid;
+    width: 95%;
+    grid-template-columns: 1fr 1fr;
+    row-gap: 8px;
+    *{
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-size: $tier_one_font_size;
+    }
+}
+
+.flex_direction_row{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+}
+.saved_graph.hoverable:hover{
+    box-shadow: 0px 0px 5px 3px $primary_hover_color;
+}
+.saved_graph.selected{
+    box-shadow: 0px 0px 5px 3px $primary_hover_color;
+    cursor: default;
+}
+.node_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 8px;
+    padding: 10px;
+    position: relative;
+    width: 100%;
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+}
+.node_container.hoverable{
+    cursor: pointer;
+}
+.node_container.hoverable:hover{
+    box-shadow: 0px 0px 5px 3px $secondary_hover_color;
+}
+.node_container.selected{
+    box-shadow: 0px 0px 5px 3px $secondary_hover_color;
+    cursor: default;
+}
+.edges_container{
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    /*
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    */
+}
+.edge_container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 8px;
+    position: relative;
+    padding: 10px;
+    width: var(--edge_container_width);
+    cursor: pointer;
+}
+.edge_container.hoverable:hover{
+    box-shadow: 0px 0px 5px 3px $third_hover_color;
+}
+.edge_container.selected{
+    box-shadow: 0px 0px 5px 3px $third_hover_color;
+    cursor: default;
+}
+.margin_bottom{
+    margin-bottom: 25px;
+}
+.add_svg_icon{
+    margin-left: 8px;
+    width: 2rem;
+    height: 2rem;
+}
+.delete_icon{
+    width: 100%;
+    height: auto;
+    max-width: 30px;
+    padding: 4px;
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    cursor: pointer;
+}
+.delete_icon.smaller{
+    max-width: 25px;
+}
+.delete_icon.smallest{
+    max-width: 20px;
+}
+.delete_icon:hover{
+    box-shadow: 0px 0px 6px 3px $secondary_hover_color;
+}
+.delete_icon.smaller:hover{
+    box-shadow: 0px 0px 6px 3px $third_hover_color;
+}
+.delete_icon.smallest:hover{
+    box-shadow: 0px 0px 6px 3px $fourth_hover_color;
+}
+.add_node_svg_icon{
+    margin-left: 8px;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.add_edge_svg_icon{
+    margin-left: 8px;
+    width: 1.8rem;
+    height: 1.8rem;
+}
+.create_graph_menu{
+    width: 95%;
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    .input_group{
+        margin-top: 4px;
+    }
+    .form-control{
+        font-size: 1.25rem;
+    }
+    
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+}
+
+#create_graph_btn{
+    font-size: $tier_four_font_size;
+}
+#mouse_tracker{
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    font-size: 1.5rem;
+    display: flex;
+    flex-flow: column wrap;
+    align-items: center;
+    justify-content: center;
+}
+
