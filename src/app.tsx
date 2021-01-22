@@ -5,7 +5,7 @@ import assets from "./images/*.webp";
 import {Graph_choose_menu} from "./components/graph_choose_menu";
 let root = document.querySelector("#root");
 let canvas, ctx;
-let distance_multiple = 0.57;
+let distance_multiple = 0.42;
 let edge_width = 1;
 
 const pi = Math.PI;
@@ -175,6 +175,89 @@ function get_random_int(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+function dijkstras_algorithm(graph, start_node_name, end_node_name){
+  let queue = [];
+  let node_names = Object.keys(graph);
+  // fill the distances array with infinities for easy comparison later on
+  function initialize_distances(node_names){
+    let distances = {};
+    for(let i = 0; i < node_names.length; i += 1){
+      distances[node_names[i]] = Infinity;
+    }
+    return distances;
+  }
+  // find the node_name with the shortest distance
+  function find_shortest_distance_node(shortest_distances, queue){
+    let names = Object.keys(shortest_distances);
+    let min_name = "";
+    let min_length = Infinity;
+    for(let i = 0; i < names.length; i += 1){
+      let current_name = names[i];
+      let current_length = shortest_distances[current_name];
+      if(current_length < min_length && queue.includes(current_name) === false){
+        min_name = current_name;
+        min_length = current_length;
+      }
+    }
+    return min_name;
+  }
+  //perfor calculations for current node, add current shortest length to edge length to produce new shortest lengths
+  function calc_shortest_distances(graph, shortest_distances, queue){
+    let current_node_name = queue[queue.length - 1];
+    let edges_object = graph[current_node_name];
+    
+    let edge_names = Object.keys(edges_object);
+    for(let i = 0; i < edge_names.length; i += 1){
+      let current_edge_name = edge_names[i];
+      let distance = shortest_distances[current_node_name] + edges_object[current_edge_name];
+      let shortest_distance = shortest_distances[current_edge_name];
+      if(distance < shortest_distance){
+        shortest_distance = distance;
+      }
+      shortest_distances[current_edge_name] = shortest_distance;
+    }
+    return shortest_distances;
+  }
+  // perform back pass to resolve the optimal path
+  function backtrack(graph, shortest_distances, start_node_name, end_node_name){
+    let current_node_name = end_node_name;
+    let running_distance = shortest_distances[end_node_name];
+    let path = [end_node_name];
+    let queue = [end_node_name];
+    while(current_node_name != start_node_name){
+      let edges_object = graph[current_node_name];
+      let edges_names = Object.keys(edges_object);
+      console.log(current_node_name, queue);
+      for(let i = 0; i < edges_names.length; i += 1){
+        let current_edge_name = edges_names[i];
+        let length = graph[current_node_name][current_edge_name];
+        let shortest_to = shortest_distances[current_edge_name];
+        let scoped_distance = running_distance - length;
+        let queue_includes = queue.includes(current_edge_name);
+        
+        if(scoped_distance === shortest_to && queue_includes === false){
+          running_distance = scoped_distance;
+          current_node_name = String(current_edge_name);
+          queue.push(current_node_name);
+          break;
+        }
+      }
+      path.push(current_node_name);
+    }
+    path = path.reverse();
+    return path;
+  }
+  let shortest_distances = initialize_distances(node_names);
+  shortest_distances[start_node_name] = 0;
+  while(queue.length != node_names.length){
+    let min_name = find_shortest_distance_node(shortest_distances, queue);
+    queue.push(min_name);
+    shortest_distances = calc_shortest_distances(graph, shortest_distances, queue);
+  }
+  let path = backtrack(graph, shortest_distances, start_node_name, end_node_name);
+  let length = shortest_distances[end_node_name];
+  console.log(path, length);
+}
 
 class Edge {
   start_x: any;
@@ -358,6 +441,7 @@ class Graph extends React.PureComponent {
   edge_font_size: number;
   weight: any;
   weight_number_offset: number;
+  height_slack: number;
   constructor(props) {
     super(props);
     this.graph = this.props.graph.graph;
@@ -365,10 +449,15 @@ class Graph extends React.PureComponent {
       canvas_width: window.innerWidth * 0.9,
 
     }
-    this.state.canvas_height = Math.min(630, Math.max(this.state.canvas_width * 0.4, 300));
+    this.height_slack = 100;
+    this.n = Object.keys(this.graph).length;
+    this.node_radius = Math.min(27, Math.max(18, this.state.canvas_width * 0.02));
+    this.x_distance_between_nodes = Math.max(this.node_radius, this.state.canvas_width * 0.02) * this.n;
+    this.state.canvas_height = this.x_distance_between_nodes * 2 + this.height_slack;
+    //Math.min(630, Math.max(this.state.canvas_width * 0.4, 300));
     this.node_list = [];
     this.edge_list = [];
-    this.n = Object.keys(this.graph).length;
+   
     this.directional_indicator_angle = 30;
     window.onresize = this.on_resize;
   }
@@ -465,22 +554,23 @@ class Graph extends React.PureComponent {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     this.node_radius = Math.min(27, Math.max(18, this.state.canvas_width * 0.02));
     this.directional_indicator_length = Math.max(this.state.canvas_width * 0.01, 8);
-    this.x_distance_between_nodes = Math.max(this.node_radius, this.state.canvas_width * 0.025) * this.n;
+    this.x_distance_between_nodes = Math.max(this.node_radius, this.state.canvas_width * 0.02) * this.n;
     this.node_font_size = Math.min(44, Math.max(this.node_radius - 2, this.state.canvas_width * 0.038));
     this.edge_font_size = Math.min(22, Math.max(16, this.state.canvas_width * 0.02));
     this.weight_number_offset = Math.min(12, Math.max(7, this.state.canvas_width * 0.01));
-    
+    this.setState({
+      canvas_width: window.innerWidth * 0.9,
+      canvas_height: this.x_distance_between_nodes * 2 + this.height_slack
+    })
     this.populate_node_list();
     this.populate_edge_list();
 
     this.draw_edges();
     this.draw_nodes();
+    dijkstras_algorithm(this.graph, "1", "5");
   }
   on_resize = (e) => {
-    this.setState({
-      canvas_width: window.innerWidth * 0.9,
-      canvas_height: Math.min(630, Math.max(this.state.canvas_width * 0.4, 300));
-    })
+    this.main();
   }
   /*
   shouldComponentUpdate(next_props){
@@ -496,10 +586,6 @@ class Graph extends React.PureComponent {
   componentDidMount() {
     canvas = document.querySelector("#canvas");
     ctx = canvas.getContext("2d");
-    this.main();
-  }
-
-  componentDidUpdate() {
     this.main();
   }
 
