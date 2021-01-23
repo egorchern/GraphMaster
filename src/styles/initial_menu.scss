@@ -147,6 +147,15 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
     align-items: center;
     width: 100%;
 }
+#algorithms_menu{
+    margin-top: 40px;
+}
+.flex_direction_column{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 .saved_graph.hoverable:hover{
     box-shadow: 0px 0px 5px 3px $primary_hover_color;
 }
