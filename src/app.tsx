@@ -168,116 +168,6 @@ function resolve_coordinates_by_angle(start_x, start_y, distance, angle) {
   }
 }
 
-//gives random integer between min(inclusive) and max(inclusive)
-function get_random_int(min, max) {
-  min = Math.ceil(min);
-  max = Math.floor(max);
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-function dijkstras_algorithm(graph, start_node_name, end_node_name) {
-  let queue = [];
-  let node_names = Object.keys(graph);
-  // fill the distances array with infinities for easy comparison later on
-  function initialize_distances(node_names) {
-    let distances = {};
-    for (let i = 0; i < node_names.length; i += 1) {
-      distances[node_names[i]] = Infinity;
-    }
-    return distances;
-  }
-  // find the node_name with the shortest distance
-  function find_shortest_distance_node(shortest_distances, queue) {
-    let names = Object.keys(shortest_distances);
-    let min_name = "";
-    let min_length = Infinity;
-    for (let i = 0; i < names.length; i += 1) {
-      let current_name = names[i];
-      let current_length = shortest_distances[current_name];
-      if (
-        current_length < min_length &&
-        queue.includes(current_name) === false
-      ) {
-        min_name = current_name;
-        min_length = current_length;
-      }
-    }
-    return min_name;
-  }
-  //perfor calculations for current node, add current shortest length to edge length to produce new shortest lengths
-  function calc_shortest_distances(graph, shortest_distances, queue) {
-    let current_node_name = queue[queue.length - 1];
-    let edges_object = graph[current_node_name];
-
-    let edge_names = Object.keys(edges_object);
-    for (let i = 0; i < edge_names.length; i += 1) {
-      let current_edge_name = edge_names[i];
-      let distance =
-        shortest_distances[current_node_name] +
-        edges_object[current_edge_name];
-      let shortest_distance = shortest_distances[current_edge_name];
-      if (distance < shortest_distance) {
-        shortest_distance = distance;
-      }
-      shortest_distances[current_edge_name] = shortest_distance;
-    }
-    return shortest_distances;
-  }
-  // perform back pass to resolve the optimal path
-  function backtrack(
-    graph,
-    shortest_distances,
-    start_node_name,
-    end_node_name
-  ) {
-    let current_node_name = end_node_name;
-    let running_distance = shortest_distances[end_node_name];
-    let path = [end_node_name];
-    let queue = [end_node_name];
-    while (current_node_name != start_node_name) {
-      let edges_object = graph[current_node_name];
-      let edges_names = Object.keys(edges_object);
-      console.log(current_node_name, queue);
-      for (let i = 0; i < edges_names.length; i += 1) {
-        let current_edge_name = edges_names[i];
-        let length = graph[current_node_name][current_edge_name];
-        let shortest_to = shortest_distances[current_edge_name];
-        let scoped_distance = running_distance - length;
-        let queue_includes = queue.includes(current_edge_name);
-
-        if (scoped_distance === shortest_to && queue_includes === false) {
-          running_distance = scoped_distance;
-          current_node_name = String(current_edge_name);
-          queue.push(current_node_name);
-          break;
-        }
-      }
-      path.push(current_node_name);
-    }
-    path = path.reverse();
-    return path;
-  }
-  let shortest_distances = initialize_distances(node_names);
-  shortest_distances[start_node_name] = 0;
-  while (queue.length != node_names.length) {
-    let min_name = find_shortest_distance_node(shortest_distances, queue);
-    queue.push(min_name);
-    shortest_distances = calc_shortest_distances(
-      graph,
-      shortest_distances,
-      queue
-    );
-  }
-  let path = backtrack(
-    graph,
-    shortest_distances,
-    start_node_name,
-    end_node_name
-  );
-  let length = shortest_distances[end_node_name];
-  console.log(path, length);
-}
-
 class Edge {
   start_x: any;
   end_x: any;
@@ -489,6 +379,33 @@ class Back_button extends React.Component {
   }
 }
 
+class Main_page_container extends React.Component{
+  constructor(props){
+    super(props);
+  }
+  render(){
+    return (
+      <div className="flex_direction_column overflow_auto">
+        <Canvas_mouse_position_tracker
+          x={this.props.x}
+          y={this.props.y}
+        />
+        <Graph
+          graph={this.props.graph}
+          onMouseMove={this.props.onMouseMove}
+        />
+        <Back_button
+          onClick={this.props.onClick}
+        ></Back_button>
+        <Algorithms_menu graph={this.props.graph.graph}>
+
+        </Algorithms_menu>
+      </div>
+    )
+    
+  }
+}
+
 class Graph extends React.PureComponent {
   graph: any;
   node_list: any[];
@@ -516,7 +433,7 @@ class Graph extends React.PureComponent {
       Math.max(18, this.state.canvas_width * 0.02)
     );
     this.x_distance_between_nodes =
-      Math.max(this.node_radius, this.state.canvas_width * 0.02) * this.n;
+      Math.min(Math.max(this.node_radius, this.state.canvas_width * 0.02), 26) * this.n;
     this.state.canvas_height =
       this.x_distance_between_nodes * 2 + this.height_slack;
     //Math.min(630, Math.max(this.state.canvas_width * 0.4, 300));
@@ -638,7 +555,7 @@ class Graph extends React.PureComponent {
       8
     );
     this.x_distance_between_nodes =
-      Math.max(this.node_radius, this.state.canvas_width * 0.02) * this.n;
+      Math.min(Math.max(this.node_radius, this.state.canvas_width * 0.02), 26) * this.n;
     this.node_font_size = Math.min(
       44,
       Math.max(this.node_radius - 2, this.state.canvas_width * 0.038)
@@ -655,6 +572,7 @@ class Graph extends React.PureComponent {
       canvas_width: window.innerWidth * 0.9,
       canvas_height: this.x_distance_between_nodes * 2 + this.height_slack,
     });
+    
     this.populate_node_list();
     this.populate_edge_list();
 
@@ -976,31 +894,15 @@ class App extends React.Component {
     return (
       <div className="app_container">
         {this.state.should_display_menu != true && (
-          <div className="flex_direction_column">
-            <Canvas_mouse_position_tracker
-              x={this.state.canvas_mouse_pos.x}
-              y={this.state.canvas_mouse_pos.y}
-            />
-            <Graph
-              graph={
-                this.state.graph_object_list[
-                this.state.selected_graph_index
-                ]
-              }
-              onMouseMove={this.on_canvas_mouse_move}
-            />
-            <Algorithms_menu graph={
-                this.state.graph_object_list[
-                this.state.selected_graph_index
-                ].graph
-              }>
+          <Main_page_container
+          x={this.state.canvas_mouse_pos.x}
+          y={this.state.canvas_mouse_pos.y}
+          graph={this.state.graph_object_list[this.state.selected_graph_index]}
+          onMouseMove={this.on_canvas_mouse_move}
+          onClick={this.on_back_button_click}
+          >
 
-            </Algorithms_menu>
-            <Back_button
-              onClick={this.on_back_button_click}
-            ></Back_button>
-            
-          </div>
+          </Main_page_container>
         )}
         {this.state.should_display_menu === true && (
           <Graph_choose_menu

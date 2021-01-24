@@ -4,7 +4,7 @@ import assets from "./images/*.webp";
 
 function round_to(n, digits) {
   if (digits === undefined) {
-      digits = 0;
+    digits = 0;
   }
 
   var multiplicator = Math.pow(10, digits);
@@ -74,15 +74,15 @@ function dijkstras_algorithm(graph, start_node_name, end_node_name) {
     while (current_node_name != start_node_name) {
       let edges_object = graph[current_node_name];
       let edges_names = Object.keys(edges_object);
-      
+
       for (let i = 0; i < edges_names.length; i += 1) {
         let current_edge_name = edges_names[i];
         let length = graph[current_node_name][current_edge_name];
         let shortest_to = round_to(shortest_distances[current_edge_name], 5);
         let scoped_distance = round_to(running_distance - length, 5);
-        
+
         let queue_includes = queue.includes(current_edge_name);
-        
+
         if (scoped_distance === shortest_to && queue_includes === false) {
           running_distance = scoped_distance;
           current_node_name = String(current_edge_name);
@@ -107,14 +107,14 @@ function dijkstras_algorithm(graph, start_node_name, end_node_name) {
     );
   }
   console.log(shortest_distances, queue);
-  
+
   let path = backtrack(
     graph,
     shortest_distances,
     start_node_name,
     end_node_name
   );
-  
+
   let length = shortest_distances[end_node_name];
   return {
     shortest_distances: shortest_distances,
@@ -133,6 +133,7 @@ export class Dijkstras_algorithm_menu extends React.Component {
     this.state = {
       start_node: "",
       end_node: "",
+      results: undefined
     };
   }
   on_start_node_value_change = (event) => {
@@ -153,7 +154,9 @@ export class Dijkstras_algorithm_menu extends React.Component {
           this.state.start_node,
           this.state.end_node
         );
-        console.log(ans_dict);
+        this.setState({
+          results: ans_dict
+        })
       } else {
         alert("Start and end nodes have to be different!");
       }
@@ -185,8 +188,9 @@ export class Dijkstras_algorithm_menu extends React.Component {
         <SlideDown className="my_slide_down">
           {selected_item_index === this.item_index && (
             <div className="graph_details">
-              <div className="edge_container">
+              <div className="edge_container cursor_default">
                 <div className="create_graph_menu">
+                  
                   <div className="edge_create_grid">
                     <span>Start node:</span>
                     <select
@@ -212,7 +216,17 @@ export class Dijkstras_algorithm_menu extends React.Component {
                     onClick={this.on_compute_click}
                   >
                     Compute
-                           </button>
+                  </button>
+                  <SlideDown className="my_slide_down">
+                    {
+                      this.state.results != undefined &&
+                      <div className="flex_direction_column results">
+                        <span>Results:</span>
+                        <span>Path: {this.state.results.path.join(", ")}</span>
+                        <span>Length: {this.state.results.length}</span>
+                      </div>
+                    }
+                  </SlideDown>
                 </div>
               </div>
             </div>

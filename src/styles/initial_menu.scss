@@ -17,9 +17,9 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
 @media (min-width: 768.01px){
     :root{
         --slide_down_width: 95%;
-        --edge_container_width: 45%;
+        --edge_container_width: 46%;
         --menu_width: 90%;
-        --button_width: 40%;
+        --button_width: 50%;
     }
 }
 
@@ -46,7 +46,7 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
         margin-top: 20px;
         width: var(--button_width);
         max-width: 165px;
-        min-width: 120px;
+        min-width: 130px;
     }
     max-width: 1000px;
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
@@ -57,7 +57,9 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
     align-items: center;
     justify-content: center;
 }
-
+.overflow_auto{
+    overflow: auto;
+}
 .saved_graph{
     margin: 8px;
     padding: 10px;
@@ -97,10 +99,10 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
     transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
 }
 .my_slide_down{
-    margin-top: 6px;
+    margin-top: 7px;
     width: var(--slide_down_width);
     border-top: 2px solid hsl(0, 0%, 85%);
-    padding-top: 6px;
+    padding-top: 7px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -147,9 +149,7 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
     align-items: center;
     width: 100%;
 }
-#algorithms_menu{
-    margin-top: 40px;
-}
+
 .flex_direction_column{
     display: flex;
     flex-direction: column;
