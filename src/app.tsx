@@ -2,8 +2,8 @@ import * as React from "react";
 import { render } from "react-dom";
 import { SlideDown } from "react-slidedown";
 import assets from "./images/*.webp";
-import { Graph_choose_menu } from "./components/graph_choose_menu";
-import { Algorithms_menu } from "./components/algorithms_menu";
+import { Graph_choose_menu } from "./graph_choose_menu";
+import { Algorithms_menu } from "./algorithms_menu";
 let root = document.querySelector("#root");
 let canvas, ctx;
 let distance_multiple = 0.42;
@@ -989,7 +989,11 @@ class App extends React.Component {
               }
               onMouseMove={this.on_canvas_mouse_move}
             />
-            <Algorithms_menu>
+            <Algorithms_menu graph={
+                this.state.graph_object_list[
+                this.state.selected_graph_index
+                ].graph
+              }>
 
             </Algorithms_menu>
             <Back_button
