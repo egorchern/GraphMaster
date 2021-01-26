@@ -55,6 +55,15 @@ export class Graph_choose_menu extends React.Component {
       this.previous_node_index = -1;
       this.previous_edge_index = -1;
     }
+    reset_input_values = () => {
+      this.setState({
+        new_node_input_value: "",
+        new_graph_input_value: "",
+        edge_add_target_node_value: "",
+        edge_add_weight_value: "",
+        edge_add_directionality_value: ""
+      })
+    }
     on_graph_click = (index) => {
       if (index != this.previous_graph_index) {
         this.previous_graph_index = index;
@@ -152,6 +161,7 @@ export class Graph_choose_menu extends React.Component {
               this.state.selected_graph_index === graph_index &&
               <img src={assets.delete_icon} className="delete_icon" onClick={() => {
                 this.props.on_graph_delete_click(graph_index);
+                this.reset_input_values();
               }}>
               </img>
             }
@@ -196,6 +206,7 @@ export class Graph_choose_menu extends React.Component {
                             this.state.selected_node_index === node_index &&
                             <img src={assets.delete_icon} className="delete_icon smaller" onClick={() => {
                               this.props.on_node_delete_click(graph_index, node_index);
+                              this.reset_input_values();
                             }}>
                             </img>
                           }
@@ -226,6 +237,7 @@ export class Graph_choose_menu extends React.Component {
                                             this.state.selected_edge_index === edge_index &&
                                             <img src={assets.delete_icon} className="delete_icon smallest" onClick={() => {
                                               this.props.on_edge_delete_click(graph_index, name, edge_name);
+                                              this.reset_input_values();
                                             }}>
                                             </img>
                                           }
@@ -272,6 +284,7 @@ export class Graph_choose_menu extends React.Component {
                                           
                                           <button className="btn btn-primary" id="create_graph_btn" onClick={() => {
                                             this.props.on_edge_add_submit(graph_index, name, this.state.edge_add_target_node_value, this.state.edge_add_weight_value, this.state.edge_add_directionality_value);
+                                            this.reset_input_values();
                                           }}>
                                             Create
                                           </button>
@@ -317,6 +330,7 @@ export class Graph_choose_menu extends React.Component {
                           </div>
                           <button className="btn btn-primary" id="create_graph_btn" onClick={() => {
                             this.props.on_node_add_submit(graph_index, this.state.new_node_input_value);
+                            this.reset_input_values();
                           }}>
                             Create
                           </button>
@@ -374,6 +388,7 @@ export class Graph_choose_menu extends React.Component {
                     </div>
                     <button className="btn btn-primary" id="create_graph_btn" onClick={() => {
                       this.props.on_graph_add_submit(this.state.new_graph_input_value);
+                      this.reset_input_values();
                     }}>
                       Create
                     </button>

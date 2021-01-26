@@ -319,7 +319,8 @@ function kruskals_algorithm(graph) {
          mst = JSON.parse(JSON.stringify(scoped_mst));
          queue.push({
             start: temp.start,
-            end: temp.end
+            end: temp.end,
+            length: temp.length
          })
          counter += 1;
       }
@@ -465,7 +466,7 @@ class Edge {
                this.directional_indicator_length,
                angles_of_indicators[i]
             );
-            console.log(temp);
+            
             let indicator_x = temp.x;
             let indicator_y = temp.y;
             ctx.beginPath();
@@ -630,7 +631,7 @@ class Graph extends React.PureComponent {
             new Node(x, y, node_names[i], this.node_radius, this.node_font_size)
          );
       }
-      console.log(local_node_list);
+      
       this.node_list = local_node_list;
    }
    populate_edge_list() {
@@ -689,7 +690,7 @@ class Graph extends React.PureComponent {
             }
          }
       }
-      console.log(local_edge_list);
+      
       this.edge_list = local_edge_list;
    }
    draw_nodes() {
