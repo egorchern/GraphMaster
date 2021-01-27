@@ -586,7 +586,7 @@ class Graph extends React.PureComponent {
       this.n = Object.keys(this.graph).length;
       this.node_radius = Math.min(
          27,
-         Math.max(18, this.state.canvas_width * 0.02)
+         Math.max(14, this.state.canvas_width * 0.02)
       );
       this.x_distance_between_nodes =
          Math.min(
@@ -600,7 +600,7 @@ class Graph extends React.PureComponent {
       this.edge_list = [];
 
       this.directional_indicator_angle = 30;
-      window.onresize = this.on_resize;
+      
    }
    populate_node_list() {
       let node_names = Object.keys(this.graph);
@@ -703,11 +703,14 @@ class Graph extends React.PureComponent {
          edge.draw();
       });
    }
+   componentWillUnmount(){
+      window.removeEventListener("resize", this.on_resize);
+   }
    main() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       this.node_radius = Math.min(
          27,
-         Math.max(18, this.state.canvas_width * 0.02)
+         Math.max(14, this.state.canvas_width * 0.02)
       );
       this.directional_indicator_length = Math.max(
          this.state.canvas_width * 0.01,
@@ -720,11 +723,11 @@ class Graph extends React.PureComponent {
          ) * this.n;
       this.node_font_size = Math.min(
          44,
-         Math.max(this.node_radius - 2, this.state.canvas_width * 0.038)
+         Math.max(this.node_radius - 4, this.state.canvas_width * 0.038)
       );
       this.edge_font_size = Math.min(
          22,
-         Math.max(16, this.state.canvas_width * 0.02)
+         Math.max(14, this.state.canvas_width * 0.02)
       );
       this.weight_number_offset = Math.min(
          12,
@@ -759,6 +762,7 @@ class Graph extends React.PureComponent {
    componentDidMount() {
       canvas = document.querySelector("#canvas");
       ctx = canvas.getContext("2d");
+      window.addEventListener("resize", this.on_resize);
       this.main();
    }
 
@@ -805,9 +809,9 @@ class App extends React.Component {
          },
          graph_object_list: graph_object_list,
          should_display_menu: true,
-         new_graph_name: "",
-         new_node_name: "",
          selected_graph_index: -1,
+         should_justify: true
+
       };
    }
    on_display_graph_click = (graph_index) => {
