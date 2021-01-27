@@ -550,7 +550,7 @@ class Main_page_container extends React.Component {
    render() {
       return (
          <div className="flex_direction_column overflow_auto">
-            <Canvas_mouse_position_tracker x={this.props.x} y={this.props.y} />
+            {/*<Canvas_mouse_position_tracker x={this.props.x} y={this.props.y}*/}
             <Graph
                graph={this.props.graph}
                onMouseMove={this.props.onMouseMove}
