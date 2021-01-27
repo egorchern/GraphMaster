@@ -40,7 +40,7 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
     border-radius: 12px;
     padding: 12px;
     
-    overflow: auto;
+    /*overflow: auto;*/
     width: var(--menu_width);
     .btn{
         margin-top: 20px;
