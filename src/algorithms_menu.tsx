@@ -1,6 +1,6 @@
 import * as React from "react";
 import { SlideDown } from "react-slidedown";
-import assets from "./images/*.webp";
+
 
 function round_to(n, digits) {
   if (digits === undefined) {
@@ -10,6 +10,43 @@ function round_to(n, digits) {
   var multiplicator = Math.pow(10, digits);
   n = parseFloat((n * multiplicator).toFixed(11));
   return Math.round(n) / multiplicator;
+}
+
+function is_edge_directional(graph, start_node_name, end_node_name) {
+  let end_node_edges = graph[end_node_name];
+  let edge_nodes_names = Object.keys(end_node_edges);
+  if (edge_nodes_names.includes(start_node_name)) {
+     let start_weight = graph[start_node_name][end_node_name];
+     let end_weight = end_node_edges[start_node_name];
+
+     if (start_weight != end_weight) {
+        return true;
+     } else {
+        return false;
+     }
+  }
+  return true;
+}
+
+function add_edge_to_graph(graph, start_node_name, end_node_name, weight, directional){
+  let new_graph = JSON.parse(JSON.stringify(graph));
+  let node_names = Object.keys(new_graph);
+  let new_edge_object = new_graph[start_node_name];
+  if (new_edge_object === undefined) {
+     new_edge_object = {};
+  }
+
+  new_edge_object[end_node_name] = weight;
+  new_graph[start_node_name] = new_edge_object;
+  if (directional === false) {
+     new_edge_object = new_graph[end_node_name];
+     if (new_edge_object === undefined) {
+        new_edge_object = {};
+     }
+     new_edge_object[start_node_name] = weight;
+     new_graph[end_node_name] = new_edge_object;
+  }
+  return new_graph;
 }
 
 function dijkstras_algorithm(graph, start_node_name, end_node_name) {
@@ -106,7 +143,7 @@ function dijkstras_algorithm(graph, start_node_name, end_node_name) {
       queue
     );
   }
-  console.log(shortest_distances, queue);
+  
 
   let path = backtrack(
     graph,
@@ -124,7 +161,122 @@ function dijkstras_algorithm(graph, start_node_name, end_node_name) {
   };
 }
 
+function is_in_path(path, start, end) {
+  for (let i = 0; i < path.length; i += 1) {
+     let path_start = path[i].start;
+     let path_end = path[i].end;
 
+     if ((path_start === start && path_end === end) || (path_start === end && path_end === start)) {
+        return true;
+     }
+  }
+  return false;
+}
+
+function traverse(graph, node_name, path) {
+  let local_path = JSON.parse(JSON.stringify(path));
+
+  if (local_path[0].start === local_path[local_path.length - 1].end) {
+
+     return local_path;
+  }
+  let edges_object = graph[node_name];
+  let edges_names = Object.keys(edges_object);
+  for (let i = 0; i < edges_names.length; i += 1) {
+     let current_edge_name = edges_names[i];
+     let in_local_path = is_in_path(local_path, node_name, current_edge_name);
+     if (in_local_path === false) {
+        local_path.push({
+           start: node_name,
+           end: current_edge_name
+        })
+        local_path = traverse(graph, current_edge_name, local_path);
+        return local_path;
+     }
+  }
+  return local_path;
+}
+
+function detect_cycle(graph) {
+  let node_names = Object.keys(graph);
+  for (let i = 0; i < node_names.length; i += 1) {
+     let current_node_name = node_names[i];
+     let edges_object = graph[current_node_name];
+     let edges_names = Object.keys(edges_object);
+     for (let j = 0; j < edges_names.length; j += 1) {
+        let current_edge_name = edges_names[j];
+        let path = [{
+           start: current_node_name,
+           end: current_edge_name
+        }]
+        path = traverse(graph, current_edge_name, path);
+        if (path[path.length - 1].end === current_node_name) {
+           return path;
+        }
+     }
+  }
+  return "nocycles";
+}
+
+function kruskals_algorithm(graph) {
+  let queue = [];
+  let mst = {};
+  let node_names = Object.keys(graph);
+  let counter = 0;
+  for (let i = 0; i < node_names.length; i += 1) {
+     mst[node_names[i]] = {};
+  }
+
+  function find_min_edge(graph, queue) {
+     let min_edge = {
+        length: Infinity,
+        start: "",
+        end: "",
+     };
+     let node_names = Object.keys(graph);
+     for (let i = 0; i < node_names.length; i += 1) {
+        let current_node_name = node_names[i];
+        let edges_object = graph[current_node_name];
+        let edges_names = Object.keys(edges_object);
+        for (let j = 0; j < edges_names.length; j += 1) {
+           let current_edge_name = edges_names[j];
+           let current_edge_length = edges_object[current_edge_name];
+           if (current_edge_length < min_edge.length && is_in_path(queue, current_node_name, current_edge_name) === false) {
+              min_edge.start = current_node_name;
+              min_edge.end = current_edge_name;
+              min_edge.length = current_edge_length;
+           }
+        }
+     }
+     return min_edge;
+  }
+  let ignore_list = [];
+  while(counter != node_names.length - 1){
+     let temp = find_min_edge(graph, ignore_list);
+     ignore_list.push({
+        start: temp.start,
+        end: temp.end
+     })
+     let scoped_mst = JSON.parse(JSON.stringify(mst));
+     let directional = is_edge_directional(graph, temp.start, temp.end);
+     scoped_mst = add_edge_to_graph(scoped_mst, temp.start, temp.end, temp.length, directional);
+     let cycle = detect_cycle(scoped_mst);
+     if(cycle === "nocycles"){
+        mst = JSON.parse(JSON.stringify(scoped_mst));
+        queue.push({
+           start: temp.start,
+           end: temp.end,
+           length: temp.length
+        })
+        counter += 1;
+     }
+     
+  }
+  return queue;
+  
+  
+
+}
 
 export class Dijkstras_algorithm_menu extends React.Component {
   item_index: number;
@@ -239,6 +391,71 @@ export class Dijkstras_algorithm_menu extends React.Component {
   }
 }
 
+export class Kruskals_algorithm_menu extends React.Component {
+  item_index: number;
+  constructor(props) {
+    super(props);
+    this.item_index = 1;
+    this.graph = this.props.graph;
+    let temp = kruskals_algorithm(this.graph);
+    
+    this.state = {
+      start_node: "",
+      end_node: "",
+      results: temp
+    };
+
+  }
+  
+  render() {
+    let selected_item_index = this.props.selected_item_index;
+    let class_list = "saved_graph ";
+    if (selected_item_index === this.item_index) {
+      class_list += "selected ";
+    } else {
+      class_list += "hoverable ";
+    }
+    let all_nodes = Object.keys(this.graph);
+    let results_markup = this.state.results.map((queue_item, index) => {
+      return(
+        <span className="kruskals_items" key={index}>[{queue_item.start}, {queue_item.end}, {queue_item.length}]</span>
+      )
+    })
+    return (
+      <div
+        className={class_list}
+        onClick={() => {
+          this.props.onClick(this.item_index);
+        }}
+      >
+        <span>MST (Kruskal's)</span>
+        <SlideDown className="my_slide_down">
+          {selected_item_index === this.item_index && (
+            <div className="graph_details">
+              <div className="edge_container cursor_default">
+                
+                <span>Results</span>
+                <div className="flex_direction_row results">
+                  <div className="flex_direction_column">
+                    <span>Queue: </span>
+                  </div>
+                  
+                  <div className="flex_direction_row flex_wrap">
+                    {results_markup}
+                  </div>
+                </div>
+                
+                  
+              
+              </div>
+            </div>
+          )}
+        </SlideDown>
+      </div>
+    );
+  }
+}
+
 export class Algorithms_menu extends React.Component {
   previous_item_index: number;
   constructor(props) {
@@ -266,6 +483,13 @@ export class Algorithms_menu extends React.Component {
             graph={this.graph}
             onClick={this.on_item_click}
           ></Dijkstras_algorithm_menu>
+          <Kruskals_algorithm_menu
+          selected_item_index={this.state.selected_item_index}
+          graph={this.graph}
+          onClick={this.on_item_click}
+          >
+
+          </Kruskals_algorithm_menu>
         </div>
       </div>
     );
