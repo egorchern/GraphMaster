@@ -326,7 +326,7 @@ function kruskals_algorithm(graph) {
       }
       
    }
-   console.log(queue);
+   
    
    
 
@@ -343,6 +343,7 @@ class Edge {
    directional_indicator_length: any;
    font_size: any;
    weight_number_offset: any;
+   highlighted: any;
    constructor(
       start_x,
       end_x,
@@ -353,7 +354,8 @@ class Edge {
       directional_indicator_angle,
       directional_indicator_length,
       font_size,
-      weight_number_offset
+      weight_number_offset,
+      highlighted
    ) {
       this.start_x = start_x;
       this.end_x = end_x;
@@ -365,6 +367,7 @@ class Edge {
       this.directional_indicator_length = directional_indicator_length;
       this.font_size = font_size;
       this.weight_number_offset = weight_number_offset;
+      this.highlighted = highlighted
    }
    draw() {
       let weight_number_offset = this.weight_number_offset;
@@ -372,7 +375,13 @@ class Edge {
       ctx.save();
       ctx.beginPath();
       ctx.strokeStyle = "hsl(0, 0%, 10%)";
+      if(this.highlighted === true){
+         ctx.strokeStyle = "hsl(0, 100%, 50%)";
+      }
       ctx.lineWidth = edge_width;
+      if(this.highlighted === true){
+         ctx.lineWidth = edge_width + 1;
+      }
       ctx.moveTo(this.start_x, this.start_y);
       ctx.lineTo(this.end_x, this.end_y);
       ctx.stroke();
@@ -546,6 +555,19 @@ class Back_button extends React.Component {
 class Main_page_container extends React.Component {
    constructor(props) {
       super(props);
+      this.state = {
+         highlighted_edges: []
+      }
+   }
+   set_new_highlights = (highlighted_edges) => {
+      this.setState({
+         highlighted_edges: highlighted_edges
+      })
+   }
+   reset_highlights = () => {
+      this.setState({
+         highlighted_edges: []
+      })
    }
    render() {
       return (
@@ -554,15 +576,16 @@ class Main_page_container extends React.Component {
             <Graph
                graph={this.props.graph}
                onMouseMove={this.props.onMouseMove}
+               highlighted_edges={this.state.highlighted_edges}
             />
             <Back_button onClick={this.props.onClick}></Back_button>
-            <Algorithms_menu graph={this.props.graph.graph}></Algorithms_menu>
+            <Algorithms_menu graph={this.props.graph.graph} set_highlights={this.set_new_highlights}></Algorithms_menu>
          </div>
       );
    }
 }
 
-class Graph extends React.PureComponent {
+class Graph extends React.Component {
    graph: any;
    node_list: any[];
    edge_list: any[];
@@ -581,6 +604,7 @@ class Graph extends React.PureComponent {
       this.graph = this.props.graph.graph;
       this.state = {
          canvas_width: window.innerWidth * 0.9,
+         highlighted_edges: this.props.highlighted_edges
       };
       this.height_slack = 100;
       this.n = Object.keys(this.graph).length;
@@ -673,6 +697,15 @@ class Graph extends React.PureComponent {
 
                let start_node_obj = this.node_list[mapper[current_node_name]];
                let end_node_obj = this.node_list[mapper[next_node_name]];
+               let is_highlighted = false;
+               if(this.state.highlighted_edges.filter((item) => {
+                  if((item.start === current_node_name && item.end === next_node_name) || (item.end === current_node_name && item.start === next_node_name)){
+                     return true;
+                  }
+                  return false;
+               }).length != 0){
+                  is_highlighted = true;
+               }
 
                let edge_obj = new Edge(
                   start_node_obj.center_x,
@@ -684,7 +717,8 @@ class Graph extends React.PureComponent {
                   this.directional_indicator_angle,
                   this.directional_indicator_length,
                   this.edge_font_size,
-                  this.weight_number_offset
+                  this.weight_number_offset,
+                  is_highlighted
                );
                local_edge_list.push(edge_obj);
             }
@@ -705,6 +739,13 @@ class Graph extends React.PureComponent {
    }
    componentWillUnmount(){
       window.removeEventListener("resize", this.on_resize);
+   }
+   componentDidUpdate(){
+      if(JSON.stringify(this.props.highlighted_edges) != JSON.stringify(this.state.highlighted_edges)){
+         
+         this.state.highlighted_edges = this.props.highlighted_edges;
+         this.main();
+      }
    }
    main() {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -736,6 +777,7 @@ class Graph extends React.PureComponent {
       this.setState({
          canvas_width: window.innerWidth * 0.9,
          canvas_height: this.x_distance_between_nodes * 2 + this.height_slack,
+         
       });
 
       this.populate_node_list();
@@ -743,22 +785,12 @@ class Graph extends React.PureComponent {
 
       this.draw_edges();
       this.draw_nodes();
-      kruskals_algorithm(this.graph);
+      
    }
    on_resize = (e) => {
       this.main();
    };
-   /*
- shouldComponentUpdate(next_props){
-     console.log(next_props);
-     let next_graph = next_props.graph;
-     if(JSON.stringify(this.graph) != JSON.stringify(next_graph)){
-         return true;
-     }
-     
-     return false;
- }
- */
+
    componentDidMount() {
       canvas = document.querySelector("#canvas");
       ctx = canvas.getContext("2d");

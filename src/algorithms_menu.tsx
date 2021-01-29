@@ -308,6 +308,18 @@ export class Dijkstras_algorithm_menu extends React.Component {
           this.state.start_node,
           this.state.end_node
         );
+        let path = ans_dict.path;
+        let highlights = [];
+        for(let i = 0; i < path.length - 1; i += 1){
+          let start = path[i];
+          let end = path[i + 1];
+          let temp = {
+            start: start,
+            end: end
+          }
+          highlights.push(temp);
+        }
+        this.props.set_highlights(highlights);
         this.setState({
           results: ans_dict
         })
@@ -425,6 +437,7 @@ export class Kruskals_algorithm_menu extends React.Component {
       <div
         className={class_list}
         onClick={() => {
+          this.props.set_highlights(this.state.results);
           this.props.onClick(this.item_index);
         }}
       >
@@ -482,11 +495,13 @@ export class Algorithms_menu extends React.Component {
             selected_item_index={this.state.selected_item_index}
             graph={this.graph}
             onClick={this.on_item_click}
+            set_highlights={this.props.set_highlights}
           ></Dijkstras_algorithm_menu>
           <Kruskals_algorithm_menu
           selected_item_index={this.state.selected_item_index}
           graph={this.graph}
           onClick={this.on_item_click}
+          set_highlights={this.props.set_highlights}
           >
 
           </Kruskals_algorithm_menu>
