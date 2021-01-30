@@ -49,7 +49,7 @@ function add_edge_to_graph(graph, start_node_name, end_node_name, weight, direct
   return new_graph;
 }
 
-function dijkstras_algorithm(graph, start_node_name, end_node_name) {
+function dijkstras_algorithm(graph, start_node_name, end_node_name, return_distances = false) {
   let queue = [];
   let node_names = Object.keys(graph);
   // fill the distances array with infinities for easy comparison later on
@@ -144,7 +144,9 @@ function dijkstras_algorithm(graph, start_node_name, end_node_name) {
     );
   }
   
-
+  if(return_distances === true){
+    return shortest_distances;
+  }
   let path = backtrack(
     graph,
     shortest_distances,
@@ -326,9 +328,32 @@ function prims_algorithm(graph, start_node_name){
   
 }
 
+function floyds_algorithm(graph){
+  let floyds_table = [];
+
+  let node_names = Object.keys(graph);
+  let n = node_names.length;
+  for(let i = 0; i < n; i += 1){
+    let empty_list = [];
+    for(let j = 0; j < n; j += 1){
+      empty_list.push(0);
+    }
+    floyds_table.push(empty_list);
+  }
+  for(let i = 0; i < n; i += 1){
+    let current_node_name = node_names[i];
+    let shortest_distances = dijkstras_algorithm(graph, current_node_name, null, true);
+    console.log(shortest_distances);
+    for(let j = 0; j < n; j += 1){
+      floyds_table[j][i] = shortest_distances[node_names[j]];
+    }
+  }
+  console.log(floyds_table);
+}
 
 export class Dijkstras_algorithm_menu extends React.Component {
   item_index: number;
+  graph: any;
   constructor(props) {
     super(props);
     this.item_index = 0;
@@ -455,6 +480,7 @@ export class Dijkstras_algorithm_menu extends React.Component {
 
 export class Kruskals_algorithm_menu extends React.Component {
   item_index: number;
+  graph: any;
   constructor(props) {
     super(props);
     this.item_index = 1;
@@ -522,6 +548,7 @@ export class Kruskals_algorithm_menu extends React.Component {
 
 export class Prims_algorithm_menu extends React.Component {
   item_index: number;
+  graph: any;
   constructor(props) {
     super(props);
     this.item_index = 2;
@@ -646,6 +673,7 @@ export class Prims_algorithm_menu extends React.Component {
 
 export class Algorithms_menu extends React.Component {
   previous_item_index: number;
+  graph: any;
   constructor(props) {
     super(props);
     this.state = {
@@ -653,7 +681,7 @@ export class Algorithms_menu extends React.Component {
     };
     this.previous_item_index = -1;
     this.graph = this.props.graph;
-    prims_algorithm(this.graph, Object.keys(this.graph)[0]);
+    floyds_algorithm(this.graph);
   }
   on_item_click = (item_index) => {
     if (this.previous_item_index != item_index) {
