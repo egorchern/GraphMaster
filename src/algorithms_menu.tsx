@@ -278,6 +278,55 @@ function kruskals_algorithm(graph) {
 
 }
 
+function prims_algorithm(graph, start_node_name){
+  let working_queue = [start_node_name];
+  let queue = [];
+  let n = Object.keys(graph).length;
+  let counter = 1;
+  function find_min_from_working_queue(graph, working_queue){
+    let start, end;
+    let min_length = Infinity;
+    
+    for(let i = 0; i < working_queue.length; i += 1){
+      let start_scoped = working_queue[i];
+      let edge_object = graph[start_scoped];
+      let edge_names = Object.keys(edge_object);
+      for(let j = 0; j < edge_names.length; j += 1){
+        let edge_name = edge_names[j];
+        let length = edge_object[edge_name];
+        if(working_queue.includes(edge_name) === false && length < min_length){
+          min_length = length;
+          start = start_scoped;
+          end = edge_name;
+        }
+      }
+    }
+    return {
+      start: start,
+      end: end,
+      length: min_length
+    }
+
+
+
+  }
+  while(counter < n){
+    let temp = find_min_from_working_queue(graph, working_queue);
+    let end_node = temp.end;
+    working_queue.push(end_node);
+    queue.push({
+      start: temp.start,
+      end: temp.end,
+      length: temp.length
+    });
+    
+    counter += 1;
+  }
+  return queue;
+  
+}
+
+
 export class Dijkstras_algorithm_menu extends React.Component {
   item_index: number;
   constructor(props) {
@@ -403,6 +452,7 @@ export class Dijkstras_algorithm_menu extends React.Component {
   }
 }
 
+
 export class Kruskals_algorithm_menu extends React.Component {
   item_index: number;
   constructor(props) {
@@ -441,7 +491,7 @@ export class Kruskals_algorithm_menu extends React.Component {
           this.props.onClick(this.item_index);
         }}
       >
-        <span>MST (Kruskal's)</span>
+        <span>MST (Kruskal's algorithm)</span>
         <SlideDown className="my_slide_down">
           {selected_item_index === this.item_index && (
             <div className="graph_details">
@@ -469,6 +519,131 @@ export class Kruskals_algorithm_menu extends React.Component {
   }
 }
 
+
+export class Prims_algorithm_menu extends React.Component {
+  item_index: number;
+  constructor(props) {
+    super(props);
+    this.item_index = 2;
+    this.graph = this.props.graph;
+    
+    
+    this.state = {
+      start_node: "",
+      results: undefined
+    };
+
+  }
+  on_compute_click = () => {
+    if(this.state.start_node === ""){
+      alert("Please select start node!");
+    }
+    else{
+      let queue = prims_algorithm(this.graph, this.state.start_node);
+      this.props.set_highlights(queue);
+      console.log(queue);
+      this.setState({
+        results: queue
+      });
+
+      
+      
+    }
+  }
+  on_start_node_value_change = (event) => {
+    this.setState({
+      start_node: event.target.value
+    })
+  }
+  render() {
+    let selected_item_index = this.props.selected_item_index;
+    let class_list = "saved_graph ";
+    if (selected_item_index === this.item_index) {
+      class_list += "selected ";
+    } else {
+      class_list += "hoverable ";
+    }
+    let all_nodes = Object.keys(this.graph);
+
+    let options = all_nodes.map((node_name) => {
+      return <option key={node_name}>{node_name}</option>;
+    });
+    
+    let results_markup; 
+    if(this.state.results != undefined){
+      results_markup = this.state.results.map((queue_item, index) => {
+        return(
+          <span className="kruskals_items" key={index}>[{queue_item.start}, {queue_item.end}, {queue_item.length}]</span>
+        )
+      })
+    }
+    
+    
+    return (
+      <div
+        className={class_list}
+        onClick={() => {
+          this.props.onClick(this.item_index);
+        }}
+      >
+        <span>MST (Prim's algorithm)</span>
+        <SlideDown className="my_slide_down">
+          {selected_item_index === this.item_index && (
+            <div className="graph_details">
+              <div className="edge_container cursor_default">
+              <div className="create_graph_menu">
+                  
+                  <div className="edge_create_grid">
+                    <span>Start node:</span>
+                    <select
+                      className="form-select form-select-sm text_align_center"
+                      value={this.state.start_node}
+                      onChange={this.on_start_node_value_change}
+                    >
+                      <option></option>
+                      {options}
+                    </select>
+                    
+                  </div>
+                  <button
+                    className="btn btn-primary display_graph_btn"
+                    onClick={this.on_compute_click}
+                  >
+                    Compute
+                  </button>
+                  <SlideDown className="my_slide_down">
+                    {
+                      this.state.results != undefined &&
+                      <div className="flex_direction_column">
+                          <span>Results</span>
+                        <div className="flex_direction_row results">
+                          <div className="flex_direction_column">
+                            <span>Queue: </span>
+                          </div>
+                          
+                          <div className="flex_direction_row flex_wrap">
+                            {results_markup}
+                          </div>
+                        </div>
+                      </div>
+                            
+                    }
+                  </SlideDown>
+                </div>
+                
+                
+                  
+              
+              </div>
+            </div>
+          )}
+        </SlideDown>
+      </div>
+    );
+  }
+}
+
+
 export class Algorithms_menu extends React.Component {
   previous_item_index: number;
   constructor(props) {
@@ -478,6 +653,7 @@ export class Algorithms_menu extends React.Component {
     };
     this.previous_item_index = -1;
     this.graph = this.props.graph;
+    prims_algorithm(this.graph, Object.keys(this.graph)[0]);
   }
   on_item_click = (item_index) => {
     if (this.previous_item_index != item_index) {
@@ -505,6 +681,14 @@ export class Algorithms_menu extends React.Component {
           >
 
           </Kruskals_algorithm_menu>
+          <Prims_algorithm_menu
+          selected_item_index={this.state.selected_item_index}
+          graph={this.graph}
+          onClick={this.on_item_click}
+          set_highlights={this.props.set_highlights}
+          >
+
+          </Prims_algorithm_menu>
         </div>
       </div>
     );
