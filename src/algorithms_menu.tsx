@@ -343,12 +343,13 @@ function floyds_algorithm(graph){
   for(let i = 0; i < n; i += 1){
     let current_node_name = node_names[i];
     let shortest_distances = dijkstras_algorithm(graph, current_node_name, null, true);
-    console.log(shortest_distances);
+    let list_of_distances = [];
     for(let j = 0; j < n; j += 1){
-      floyds_table[j][i] = shortest_distances[node_names[j]];
+      list_of_distances.push(shortest_distances[node_names[j]]);
     }
+    floyds_table[i] = list_of_distances;
   }
-  console.log(floyds_table);
+  return floyds_table;
 }
 
 export class Dijkstras_algorithm_menu extends React.Component {
@@ -356,7 +357,7 @@ export class Dijkstras_algorithm_menu extends React.Component {
   graph: any;
   constructor(props) {
     super(props);
-    this.item_index = 0;
+    this.item_index = this.props.item_index;
     this.graph = this.props.graph;
     this.state = {
       start_node: "",
@@ -483,7 +484,7 @@ export class Kruskals_algorithm_menu extends React.Component {
   graph: any;
   constructor(props) {
     super(props);
-    this.item_index = 1;
+    this.item_index = this.props.item_index;
     this.graph = this.props.graph;
     let temp = kruskals_algorithm(this.graph);
     
@@ -545,13 +546,109 @@ export class Kruskals_algorithm_menu extends React.Component {
   }
 }
 
+export class Floyds_algorithm_menu extends React.Component {
+  item_index: number;
+  graph: any;
+  constructor(props) {
+    super(props);
+    this.item_index = this.props.item_index;
+    this.graph = this.props.graph;
+    let temp = floyds_algorithm(this.graph);
+    console.log(temp);
+    this.state = {
+      start_node: "",
+      end_node: "",
+      results: temp
+    };
+
+  }
+  
+  render() {
+    let selected_item_index = this.props.selected_item_index;
+    let class_list = "saved_graph ";
+    if (selected_item_index === this.item_index) {
+      class_list += "selected ";
+    } else {
+      class_list += "hoverable ";
+    }
+    let all_nodes = Object.keys(this.graph);
+    let table_headers = all_nodes.map((node_name, index) => {
+      return (
+        
+        <th key={node_name} scope="col">
+          {node_name}
+        </th>
+        
+      )
+    })
+    let table_contents = this.state.results.map((result_list, node_index) => {
+      let values = result_list.map((value, index) => {
+        return (
+          <td key={index}>
+            {value}
+          </td>
+        )
+      })
+      return (
+        <tr key={node_index}>
+          <td>
+            {all_nodes[node_index]}
+          </td>
+          {values}
+        </tr>
+      )
+    })
+    return (
+      <div
+        className={class_list}
+        onClick={() => {
+          
+          this.props.onClick(this.item_index);
+        }}
+      >
+        <span>Floyd's algorithm</span>
+        <SlideDown className="my_slide_down">
+          {selected_item_index === this.item_index && (
+            <div className="graph_details">
+              <div className="edge_container cursor_default">
+                <span className="margin_bottom">Results</span>
+                <span>To</span>
+                <div className="flex_direction_row">
+                  <span className="table_direction_indicator">
+                    From
+                  </span>
+                  <table className="table table-bordered floyds_table">
+                    
+                    <thead>
+                      <tr>
+                        <th>Node</th>
+                        {table_headers}
+                      </tr>
+                      
+                    </thead>
+                    <tbody>
+                      {table_contents}
+                    </tbody>
+                  </table>
+                </div>
+                
+                  
+              
+              </div>
+            </div>
+          )}
+        </SlideDown>
+      </div>
+    );
+  }
+}
 
 export class Prims_algorithm_menu extends React.Component {
   item_index: number;
   graph: any;
   constructor(props) {
     super(props);
-    this.item_index = 2;
+    this.item_index = this.props.item_index;
     this.graph = this.props.graph;
     
     
@@ -697,14 +794,24 @@ export class Algorithms_menu extends React.Component {
           <h2 className="margin_bottom">Algorithms/Tools</h2>
           <Dijkstras_algorithm_menu
             selected_item_index={this.state.selected_item_index}
+            item_index = {0}
             graph={this.graph}
             onClick={this.on_item_click}
             set_highlights={this.props.set_highlights}
           ></Dijkstras_algorithm_menu>
+          <Floyds_algorithm_menu
+          selected_item_index={this.state.selected_item_index}
+          item_index = {1}
+          graph={this.graph}
+          onClick={this.on_item_click}
+          >
+
+          </Floyds_algorithm_menu>
           <Kruskals_algorithm_menu
           selected_item_index={this.state.selected_item_index}
           graph={this.graph}
           onClick={this.on_item_click}
+          item_index = {2}
           set_highlights={this.props.set_highlights}
           >
 
@@ -713,10 +820,12 @@ export class Algorithms_menu extends React.Component {
           selected_item_index={this.state.selected_item_index}
           graph={this.graph}
           onClick={this.on_item_click}
+          item_index = {3}
           set_highlights={this.props.set_highlights}
           >
 
           </Prims_algorithm_menu>
+          
         </div>
       </div>
     );
