@@ -22,6 +22,22 @@ html, body{
     overflow-x: hidden;
     
 }
+@media (max-width: 768px){
+    :root{
+        --app_container_padding: 0;
+        --table_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
+        --table_padding: 0;
+        --display_table_direction_indicator: none;
+    }
+}
+@media (min-width: 768.01px){
+    :root{
+        --app_container_padding: 10px;
+        --table_font_size:  min(max(16px, calc(1rem + 0.5vw)), 20px);
+        --table_padding: 0.2rem;
+        --display_table_direction_indicator: block;
+    }
+}
 .back_button_svg{
     width: 2.2rem;
     height: 2.2rem;
@@ -46,7 +62,7 @@ html, body{
     justify-content: center;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 10px;
+    padding: var(--app_container_padding)
 }
 .text_align_center{
     text-align: center;
@@ -88,4 +104,19 @@ html, body{
 .kruskals_items{
     margin-left: 5px;
     margin-right: 5px;
+}
+.floyds_table{
+    th, td{
+        font-size: var(--table_font_size);
+        text-align: center;
+        padding: var(--table_padding);
+    }
+    margin-bottom: 0;
+    margin-left: 10px;
+}
+.width_full{
+    width: 100%;
+}
+.table_direction_indicator{
+    display: var(--display_table_direction_indicator);
 }
