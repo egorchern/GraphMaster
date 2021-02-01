@@ -510,6 +510,12 @@ export class Kruskals_algorithm_menu extends React.Component {
         <span className="kruskals_items" key={index}>[{queue_item.start}, {queue_item.end}, {queue_item.length}]</span>
       )
     })
+    let mst_length = 0;
+    for(let i = 0; i < this.state.results.length; i += 1){
+      let length = this.state.results[i].length;
+      mst_length += length;
+    }
+    
     return (
       <div
         className={class_list}
@@ -534,6 +540,7 @@ export class Kruskals_algorithm_menu extends React.Component {
                     {results_markup}
                   </div>
                 </div>
+                <span className="margin_top_small">MST weight: {mst_length}</span>
                 
                   
               
@@ -701,6 +708,13 @@ export class Prims_algorithm_menu extends React.Component {
         )
       })
     }
+    let mst_length = 0;
+    if(this.state.results != undefined){
+      for(let i = 0; i < this.state.results.length; i += 1){
+        let length = this.state.results[i].length;
+        mst_length += length;
+      }
+    }
     
     
     return (
@@ -739,7 +753,7 @@ export class Prims_algorithm_menu extends React.Component {
                     {
                       this.state.results != undefined &&
                       <div className="flex_direction_column">
-                          <span>Results</span>
+                        <span>Results</span>
                         <div className="flex_direction_row results">
                           <div className="flex_direction_column">
                             <span>Queue: </span>
@@ -749,6 +763,7 @@ export class Prims_algorithm_menu extends React.Component {
                             {results_markup}
                           </div>
                         </div>
+                        <span className="margin_top_small">MST weight: {mst_length}</span>
                       </div>
                             
                     }

@@ -34,7 +34,7 @@ html, body{
     :root{
         --app_container_padding: 10px;
         --table_font_size:  min(max(16px, calc(1rem + 0.5vw)), 20px);
-        --table_padding: 0.2rem;
+        --table_padding: 0.3rem;
         --display_table_direction_indicator: block;
     }
 }
@@ -97,6 +97,9 @@ html, body{
     margin-left:auto;
     margin-right: auto;
     
+}
+.margin_top_small{
+    margin-top:4px;
 }
 .results{
     
