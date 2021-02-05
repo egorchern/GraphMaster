@@ -1,6 +1,7 @@
 import * as React from "react";
-import { SlideDown } from "react-slidedown";
-
+import {SlideDown} from "react-slidedown";
+//TODO make dijkstras give results on nodes that can't be reached
+let infinity_symbol = "\u221E";
 function round_to(n, digits) {
   if (digits === undefined) {
     digits = 0;
@@ -91,19 +92,22 @@ function dijkstras_algorithm(
   //perfor calculations for current node, add current shortest length to edge length to produce new shortest lengths
   function calc_shortest_distances(graph, shortest_distances, queue) {
     let current_node_name = queue[queue.length - 1];
+    if(current_node_name === ""){
+      return shortest_distances;
+    }
     let edges_object = graph[current_node_name];
-
+    
     let edge_names = Object.keys(edges_object);
     for (let i = 0; i < edge_names.length; i += 1) {
       let current_edge_name = edge_names[i];
       let distance =
-        shortest_distances[current_node_name] +
-        edges_object[current_edge_name];
+        shortest_distances[current_node_name] + edges_object[current_edge_name];
       let shortest_distance = shortest_distances[current_edge_name];
       if (distance < shortest_distance) {
         shortest_distance = distance;
       }
       shortest_distances[current_edge_name] = shortest_distance;
+      
     }
     return shortest_distances;
   }
@@ -114,25 +118,61 @@ function dijkstras_algorithm(
     start_node_name,
     end_node_name
   ) {
+    
+    let node_names = Object.keys(graph);
+    
+    if(shortest_distances[end_node_name] === Infinity){
+      return ["None"];
+    }
+    
     let current_node_name = end_node_name;
     let running_distance = shortest_distances[end_node_name];
     let path = [end_node_name];
     let queue = [end_node_name];
     while (current_node_name != start_node_name) {
+      
+      for(let i = 0; i < node_names.length; i += 1){
+        let node_name = node_names[i];
+        if(queue.includes(node_name) === true){
+          continue;
+        }
+        let edges_object = graph[node_name];
+        let edges_names = Object.keys(edges_object);
+        let found = false;
+        for(let j = 0; j < edges_names.length; j += 1){
+          let edge_name = edges_names[j];
+          if(edge_name === current_node_name ){
+            let length = edges_object[current_node_name];
+            let shortest_to = round_to(shortest_distances[node_name], 5);
+            let scoped_distance = round_to(running_distance - length, 5);
+            
+            if(scoped_distance === shortest_to){
+              running_distance = scoped_distance;
+              current_node_name = String(node_name);
+              found = true;
+              queue.push(current_node_name);
+              break;
+            }
+          }
+        }
+        if(found === true){
+          break;
+        }
+      }
+      path.push(current_node_name);
+      
+      /*
       let edges_object = graph[current_node_name];
       let edges_names = Object.keys(edges_object);
-
+      
       for (let i = 0; i < edges_names.length; i += 1) {
         let current_edge_name = edges_names[i];
         let length = graph[current_node_name][current_edge_name];
-        let shortest_to = round_to(
-          shortest_distances[current_edge_name],
-          5
-        );
-        let scoped_distance = round_to(running_distance - length, 5);
+        let shortest_to = round_to(shortest_distances[current_edge_name], 5);
+        let scoped_distance = round_to(running_distance + length, 5);
 
         let queue_includes = queue.includes(current_edge_name);
-
+        
         if (scoped_distance === shortest_to && queue_includes === false) {
           running_distance = scoped_distance;
           current_node_name = String(current_edge_name);
@@ -141,6 +181,7 @@ function dijkstras_algorithm(
         }
       }
       path.push(current_node_name);
+      */
     }
     path = path.reverse();
     return path;
@@ -156,17 +197,18 @@ function dijkstras_algorithm(
       queue
     );
   }
-
+  
   if (return_distances === true) {
     return shortest_distances;
   }
+  
   let path = backtrack(
     graph,
     shortest_distances,
     start_node_name,
     end_node_name
   );
-
+  
   let length = shortest_distances[end_node_name];
   return {
     shortest_distances: shortest_distances,
@@ -240,53 +282,38 @@ function detect_cycle(graph) {
   return "nocycles";
 }
 
-
-
-function depth_first_traversal(graph, start_node_name) {
-  let edges_object = graph[start_node_name];
-  let edges_names = Object.keys(edges_object);
-  let all_paths = [];
-  edges_names.forEach((edge_name) => {
-    let path = [
-      {
-        start: start_node_name,
-        end: edge_name,
-      },
-    ];
-    path = traverse(graph, edge_name, path, false);
-    all_paths.push(path);
-  });
-  //console.log(all_paths);
-}
-
-function hamiltonian_traverse(graph, node_name, path, visited_nodes){
+function hamiltonian_traverse(graph, node_name, path, visited_nodes) {
   let local_path = JSON.parse(JSON.stringify(path));
   let edges_object = graph[node_name];
   let edges_names = Object.keys(edges_object);
   for (let i = 0; i < edges_names.length; i += 1) {
     let current_edge_name = edges_names[i];
     let in_visited_nodes = visited_nodes.includes(current_edge_name);
-    if(current_edge_name === visited_nodes[0]){
+    if (current_edge_name === visited_nodes[0]) {
       let n = Object.keys(graph).length;
-      
-      if(visited_nodes.length === n){
-        
+
+      if (visited_nodes.length === n) {
         in_visited_nodes = false;
       }
     }
-    
+
     let in_local_path = is_in_path(local_path, node_name, current_edge_name);
     if (in_local_path === false && in_visited_nodes === false) {
       local_path.push({
         start: node_name,
         end: current_edge_name,
-        length: edges_object[current_edge_name]
+        length: edges_object[current_edge_name],
       });
       visited_nodes.push(current_edge_name);
-      let unpack = hamiltonian_traverse(graph, current_edge_name, local_path, visited_nodes);
+      let unpack = hamiltonian_traverse(
+        graph,
+        current_edge_name,
+        local_path,
+        visited_nodes
+      );
       local_path = unpack[0];
       visited_nodes = unpack[1];
-      
+
       return [local_path, visited_nodes];
     }
   }
@@ -303,20 +330,27 @@ function find_hamiltonian_cycle(graph) {
     for (let j = 0; j < edges_names.length; j += 1) {
       let current_edge_name = edges_names[j];
       let visited_nodes = [current_node_name, current_edge_name];
-      let path = [{
-        start: current_node_name,
-        end: current_edge_name,
-        length: edges_object[current_edge_name]
-      }]
-      let unpack = hamiltonian_traverse(graph, current_edge_name, path, visited_nodes);
+      let path = [
+        {
+          start: current_node_name,
+          end: current_edge_name,
+          length: edges_object[current_edge_name],
+        },
+      ];
+      let unpack = hamiltonian_traverse(
+        graph,
+        current_edge_name,
+        path,
+        visited_nodes
+      );
       path = unpack[0];
       visited_nodes = unpack[1];
-      if(visited_nodes.length > node_names.length ){
+      if (visited_nodes.length > node_names.length) {
         return path;
       }
     }
   }
-  return "no_cycle";
+  return [];
 }
 
 function kruskals_algorithm(graph) {
@@ -460,6 +494,50 @@ function floyds_algorithm(graph) {
   return floyds_table;
 }
 
+function depth_traverse(graph, node_name, path, visited_nodes){
+  let local_path = JSON.parse(JSON.stringify(path));
+  let edges_object = graph[node_name];
+  let edges_names = Object.keys(edges_object);
+  
+  for (let i = 0; i < edges_names.length; i += 1) {
+    let current_edge_name = edges_names[i];
+    let in_visited_nodes = visited_nodes.includes(current_edge_name);
+
+    let in_local_path = is_in_path(local_path, node_name, current_edge_name);
+    if (in_local_path === false && in_visited_nodes === false) {
+      local_path.push({
+        start: node_name,
+        end: current_edge_name,
+        
+      });
+      visited_nodes.push(current_edge_name);
+      
+      local_path = depth_traverse(graph, current_edge_name, local_path, visited_nodes);
+      //return [local_path, visited_nodes];
+    }
+  }
+
+  return local_path;
+}
+
+function depth_first_traversal(graph, start_node_name) {
+  let edges_object = graph[start_node_name];
+  let edges_names = Object.keys(edges_object);
+  let all_paths = [];
+  let visited_edges = [start_node_name];
+  edges_names.forEach((edge_name) => {
+    let path = [
+      {
+        start: start_node_name,
+        end: edge_name,
+      },
+    ];
+    visited_edges.push(edge_name);
+    let scoped_path = depth_traverse(graph, edge_name, path, visited_edges);
+    
+  });
+  //console.log(all_paths);
+}
 
 export class Dijkstras_algorithm_menu extends React.Component {
   item_index: number;
@@ -565,18 +643,13 @@ export class Dijkstras_algorithm_menu extends React.Component {
                     onClick={this.on_compute_click}
                   >
                     Compute
-                           </button>
+                  </button>
                   <SlideDown className="my_slide_down">
                     {this.state.results != undefined && (
                       <div className="flex_direction_column results">
                         <span>Results:</span>
-                        <span>
-                          Path:{" "}
-                          {this.state.results.path.join(", ")}
-                        </span>
-                        <span>
-                          Length: {this.state.results.length}
-                        </span>
+                        <span>Path: {this.state.results.path.join(", ")}</span>
+                        <span>Length: {this.state.results.length}</span>
                       </div>
                     )}
                   </SlideDown>
@@ -590,7 +663,6 @@ export class Dijkstras_algorithm_menu extends React.Component {
   }
 }
 
-
 export class Kruskals_algorithm_menu extends React.Component {
   item_index: number;
   graph: any;
@@ -598,15 +670,18 @@ export class Kruskals_algorithm_menu extends React.Component {
     super(props);
     this.item_index = this.props.item_index;
     this.graph = this.props.graph;
-    let temp = kruskals_algorithm(this.graph);
-    
+   
+
     this.state = {
       start_node: "",
       end_node: "",
-      results: temp,
+      results: undefined,
     };
   }
-
+  calculate = () => {
+    this.state.results = kruskals_algorithm(this.graph);
+    
+  }
   render() {
     let selected_item_index = this.props.selected_item_index;
     let class_list = "saved_graph ";
@@ -616,23 +691,28 @@ export class Kruskals_algorithm_menu extends React.Component {
       class_list += "hoverable ";
     }
     let all_nodes = Object.keys(this.graph);
-    let results_markup = this.state.results.map((queue_item, index) => {
-      return (
-        <span className="kruskals_items" key={index}>
-          [{queue_item.start}, {queue_item.end}, {queue_item.length}]
-        </span>
-      );
-    });
-    let mst_length = 0;
-    for (let i = 0; i < this.state.results.length; i += 1) {
-      let length = this.state.results[i].length;
-      mst_length += length;
+    let results_markup, mst_length;
+    if(this.state.results != undefined){
+      results_markup = this.state.results.map((queue_item, index) => {
+        return (
+          <span className="kruskals_items" key={index}>
+            [{queue_item.start}, {queue_item.end}, {queue_item.length}]
+          </span>
+        );
+      });
+      mst_length = 0;
+      for (let i = 0; i < this.state.results.length; i += 1) {
+        let length = this.state.results[i].length;
+        mst_length += length;
+      }
     }
 
     return (
       <div
         className={class_list}
         onClick={() => {
+          this.calculate();
+          
           this.props.set_highlights(this.state.results);
           this.props.onClick(this.item_index);
         }}
@@ -664,7 +744,6 @@ export class Kruskals_algorithm_menu extends React.Component {
   }
 }
 
-
 export class Floyds_algorithm_menu extends React.Component {
   item_index: number;
   graph: any;
@@ -672,15 +751,19 @@ export class Floyds_algorithm_menu extends React.Component {
     super(props);
     this.item_index = this.props.item_index;
     this.graph = this.props.graph;
-    let temp = floyds_algorithm(this.graph);
+    
 
     this.state = {
       start_node: "",
       end_node: "",
-      results: temp,
+      results: undefined,
     };
   }
-
+  calculate = () => {
+    this.setState({
+      results: floyds_algorithm(this.graph);
+    })
+  }
   render() {
     let selected_item_index = this.props.selected_item_index;
     let class_list = "saved_graph ";
@@ -689,30 +772,39 @@ export class Floyds_algorithm_menu extends React.Component {
     } else {
       class_list += "hoverable ";
     }
-    let all_nodes = Object.keys(this.graph);
-    let table_headers = all_nodes.map((node_name, index) => {
-      return (
-        <th key={node_name} scope="col">
-          {node_name}
-        </th>
-      );
-    });
-    let table_contents = this.state.results.map((result_list, node_index) => {
-      let values = result_list.map((value, index) => {
-        return <td key={index}>{value}</td>;
+    let all_nodes, table_headers, table_contents;
+    if(this.state.results != undefined){
+      all_nodes = Object.keys(this.graph);
+      table_headers = all_nodes.map((node_name, index) => {
+        return (
+          <th key={node_name} scope="col">
+            {node_name}
+          </th>
+        );
       });
-      return (
-        <tr key={node_index}>
-          <td>{all_nodes[node_index]}</td>
-          {values}
-        </tr>
-      );
-    });
+      table_contents = this.state.results.map((result_list, node_index) => {
+        let values = result_list.map((value, index) => {
+          let scoped_value = value;
+          if(scoped_value === Infinity){
+            scoped_value = infinity_symbol;
+          }
+          return <td key={index}>{scoped_value}</td>;
+        });
+        return (
+          <tr key={node_index}>
+            <td>{all_nodes[node_index]}</td>
+            {values}
+          </tr>
+        );
+      });
+    }
     return (
       <div
         className={class_list}
         onClick={() => {
+          this.calculate();
           this.props.onClick(this.item_index);
+
         }}
       >
         <span>Floyd's algorithm</span>
@@ -723,9 +815,7 @@ export class Floyds_algorithm_menu extends React.Component {
                 <span className="margin_bottom">Results</span>
                 <span>To</span>
                 <div className="flex_direction_row">
-                  <span className="table_direction_indicator">
-                    From
-                           </span>
+                  <span className="table_direction_indicator">From</span>
                   <table className="table table-bordered floyds_table">
                     <thead>
                       <tr>
@@ -744,7 +834,6 @@ export class Floyds_algorithm_menu extends React.Component {
     );
   }
 }
-
 
 export class Prims_algorithm_menu extends React.Component {
   item_index: number;
@@ -837,7 +926,7 @@ export class Prims_algorithm_menu extends React.Component {
                     onClick={this.on_compute_click}
                   >
                     Compute
-                           </button>
+                  </button>
                   <SlideDown className="my_slide_down">
                     {this.state.results != undefined && (
                       <div className="flex_direction_column">
@@ -867,7 +956,6 @@ export class Prims_algorithm_menu extends React.Component {
   }
 }
 
-
 export class Hamiltonian_cycle_algorithm_menu extends React.Component {
   item_index: number;
   graph: any;
@@ -875,15 +963,16 @@ export class Hamiltonian_cycle_algorithm_menu extends React.Component {
     super(props);
     this.item_index = this.props.item_index;
     this.graph = this.props.graph;
-    let temp = find_hamiltonian_cycle(this.graph);
-    console.log(temp);
+    
     this.state = {
       start_node: "",
       end_node: "",
-      results: temp,
+      results: undefined,
     };
   }
-
+  calculate = () => {
+    this.state.results = find_hamiltonian_cycle(this.graph);
+  }
   render() {
     let selected_item_index = this.props.selected_item_index;
     let class_list = "saved_graph ";
@@ -895,33 +984,33 @@ export class Hamiltonian_cycle_algorithm_menu extends React.Component {
     let all_nodes = Object.keys(this.graph);
     let cycle_markup;
     let cycle_length;
-    if(this.state.results === "no_cycle"){
-      cycle_markup = (
-        <div className="margin_left flex_direction_row">
-          <span className="text_align_center">No Hamiltonian cycles</span>
-        </div>
-        
-      )
-    }
-    else{
-      cycle_markup = this.state.results.map((path_object, index) => {
-        return (
-          <span key={index} className="kruskals_items">
-            [{path_object.start}, {path_object.end}, {path_object.length}]
-          </span>
-        )
-      })
-      cycle_length = 0;
-      this.state.results.forEach(path_object => {
-        cycle_length += path_object.length;
-      });
-      
+    if(this.state.results != undefined){
+      if (this.state.results.length === 0) {
+        cycle_markup = (
+          <div className="margin_left flex_direction_row">
+            <span className="text_align_center">No Hamiltonian cycles</span>
+          </div>
+        );
+      } else {
+        cycle_markup = this.state.results.map((path_object, index) => {
+          return (
+            <span key={index} className="kruskals_items">
+              [{path_object.start}, {path_object.end}, {path_object.length}]
+            </span>
+          );
+        });
+        cycle_length = 0;
+        this.state.results.forEach((path_object) => {
+          cycle_length += path_object.length;
+        });
+      }
     }
     return (
       <div
         className={class_list}
         onClick={() => {
-          
+          this.calculate();
+          this.props.set_highlights(this.state.results);
           this.props.onClick(this.item_index);
         }}
       >
@@ -933,19 +1022,19 @@ export class Hamiltonian_cycle_algorithm_menu extends React.Component {
                 <span>Results</span>
                 <div className="flex_direction_row">
                   <div className="flex_direction_column">
-                    <span className="text_align_center">Hamiltonian cycle:</span>
+                    <span className="text_align_center">
+                      Hamiltonian cycle:
+                    </span>
                   </div>
                   <div className="flex_direction_row flex_wrap margin_left">
                     {cycle_markup}
                   </div>
-                  
                 </div>
-                {
-                  this.state.results != "no_cycle" &&
+                {this.state.results.length != 0 && (
                   <span className="margin_top_small">
                     Cycle length: {cycle_length}
                   </span>
-                }
+                )}
               </div>
             </div>
           )}
@@ -954,7 +1043,6 @@ export class Hamiltonian_cycle_algorithm_menu extends React.Component {
     );
   }
 }
-
 
 export class Algorithms_menu extends React.Component {
   previous_item_index: number;
@@ -966,7 +1054,7 @@ export class Algorithms_menu extends React.Component {
     };
     this.previous_item_index = -1;
     this.graph = this.props.graph;
-    
+    depth_first_traversal(this.graph, Object.keys(this.graph)[0]);
   }
   on_item_click = (item_index) => {
     if (this.previous_item_index != item_index) {
