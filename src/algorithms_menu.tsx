@@ -1,6 +1,6 @@
 import * as React from "react";
 import {SlideDown} from "react-slidedown";
-//TODO make dijkstras give results on nodes that can't be reached
+
 let infinity_symbol = "\u221E";
 function round_to(n, digits) {
   if (digits === undefined) {
@@ -508,6 +508,7 @@ function depth_traverse(graph, node_name, path, visited_nodes){
       local_path.push({
         start: node_name,
         end: current_edge_name,
+        length: edges_object[current_edge_name]
         
       });
       visited_nodes.push(current_edge_name);
@@ -524,19 +525,31 @@ function depth_first_traversal(graph, start_node_name) {
   let edges_object = graph[start_node_name];
   let edges_names = Object.keys(edges_object);
   let all_paths = [];
-  let visited_edges = [start_node_name];
+  let global_visited_edges = [start_node_name];
+  let global_path = [];
   edges_names.forEach((edge_name) => {
+    let visited_edges = [start_node_name];
+    visited_edges.push(edge_name);
     let path = [
       {
         start: start_node_name,
         end: edge_name,
+        length: edges_object[edge_name]
       },
     ];
-    visited_edges.push(edge_name);
+    
     let scoped_path = depth_traverse(graph, edge_name, path, visited_edges);
+    for(let i = 0; i < scoped_path.length; i += 1){
+      let path_part = scoped_path[i];
+      let includes = global_visited_edges.includes(path_part.end);
+      if(includes === false){
+        global_path.push(path_part);
+        global_visited_edges.push(path_part.end);
+      }
+    }
     
   });
-  //console.log(all_paths);
+  return global_path;
 }
 
 export class Dijkstras_algorithm_menu extends React.Component {
@@ -1044,6 +1057,123 @@ export class Hamiltonian_cycle_algorithm_menu extends React.Component {
   }
 }
 
+export class Depth_first_traversal_algorithm_menu extends React.Component {
+  item_index: number;
+  graph: any;
+  constructor(props) {
+    super(props);
+    this.item_index = this.props.item_index;
+    this.graph = this.props.graph;
+
+    this.state = {
+      start_node: "",
+      results: undefined,
+    };
+  }
+  on_compute_click = () => {
+    let results = depth_first_traversal(this.graph, this.state.start_node);
+    this.props.set_highlights(results);
+    this.setState({
+      results: results
+    })
+    
+  };
+  on_start_node_value_change = (event) => {
+    this.setState({
+      start_node: event.target.value,
+    });
+  };
+  render() {
+    let selected_item_index = this.props.selected_item_index;
+    let class_list = "saved_graph ";
+    if (selected_item_index === this.item_index) {
+      class_list += "selected ";
+    } else {
+      class_list += "hoverable ";
+    }
+    let all_nodes = Object.keys(this.graph);
+
+    let options = all_nodes.map((node_name) => {
+      return <option key={node_name}>{node_name}</option>;
+    });
+
+    let results_markup;
+    if (this.state.results != undefined) {
+      results_markup = this.state.results.map((queue_item, index) => {
+        return (
+          <span className="kruskals_items" key={index}>
+            [{queue_item.start}, {queue_item.end}, {queue_item.length}]
+          </span>
+        );
+      });
+    }
+    let path_length = 0;
+    if (this.state.results != undefined) {
+      for (let i = 0; i < this.state.results.length; i += 1) {
+        let length = this.state.results[i].length;
+        path_length += length;
+      }
+    }
+
+    return (
+      <div
+        className={class_list}
+        onClick={() => {
+          this.props.onClick(this.item_index);
+        }}
+      >
+        <span>Depth-first traversal</span>
+        <SlideDown className="my_slide_down">
+          {selected_item_index === this.item_index && (
+            <div className="graph_details">
+              <div className="edge_container cursor_default">
+                <div className="create_graph_menu">
+                  <div className="edge_create_grid">
+                    <span>Start node:</span>
+                    <select
+                      className="form-select form-select-sm text_align_center"
+                      value={this.state.start_node}
+                      onChange={this.on_start_node_value_change}
+                    >
+                      <option></option>
+                      {options}
+                    </select>
+                  </div>
+                  <button
+                    className="btn btn-primary display_graph_btn"
+                    onClick={this.on_compute_click}
+                  >
+                    Compute
+                  </button>
+                  <SlideDown className="my_slide_down">
+                    {this.state.results != undefined && (
+                      <div className="flex_direction_column">
+                        <span>Results</span>
+                        <div className="flex_direction_row results">
+                          <div className="flex_direction_column">
+                            <span>Path: </span>
+                          </div>
+
+                          <div className="flex_direction_row flex_wrap">
+                            {results_markup}
+                          </div>
+                        </div>
+                        <span className="margin_top_small">
+                          Path length: {path_length}
+                        </span>
+                      </div>
+                    )}
+                  </SlideDown>
+                </div>
+              </div>
+            </div>
+          )}
+        </SlideDown>
+      </div>
+    );
+  }
+}
+
 export class Algorithms_menu extends React.Component {
   previous_item_index: number;
   graph: any;
@@ -1054,7 +1184,7 @@ export class Algorithms_menu extends React.Component {
     };
     this.previous_item_index = -1;
     this.graph = this.props.graph;
-    depth_first_traversal(this.graph, Object.keys(this.graph)[0]);
+    
   }
   on_item_click = (item_index) => {
     if (this.previous_item_index != item_index) {
@@ -1102,6 +1232,13 @@ export class Algorithms_menu extends React.Component {
             item_index={4}
             set_highlights={this.props.set_highlights}
           ></Hamiltonian_cycle_algorithm_menu>
+          <Depth_first_traversal_algorithm_menu
+            selected_item_index={this.state.selected_item_index}
+            graph={this.graph}
+            onClick={this.on_item_click}
+            item_index={5}
+            set_highlights={this.props.set_highlights}
+          ></Depth_first_traversal_algorithm_menu>
         </div>
       </div>
     );
