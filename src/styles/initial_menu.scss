@@ -12,6 +12,7 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
         --edge_container_width: 100%;
         --menu_width: 100%;
         --button_width: 75%;
+        --graph_button_max_width: 26px;
     }
 }
 @media (min-width: 768.01px){
@@ -20,6 +21,7 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
         --edge_container_width: 46%;
         --menu_width: 90%;
         --button_width: 50%;
+        --graph_button_max_width: 34px;
     }
 }
 
@@ -222,29 +224,43 @@ $tier_one_font_size: min(max(14px, calc(1rem + 0.3vw)), 18px);
     width: 2rem;
     height: 2rem;
 }
-.delete_icon{
-    width: 100%;
-    height: auto;
-    max-width: 30px;
-    padding: 4px;
+.graph_buttons_container{
+    
     position: absolute;
-    top: 10px;
-    right: 15px;
+    top: 8px;
+    right: 13px;
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    justify-content: center;
+}
+.graph_button{
     cursor: pointer;
+    transition: box-shadow 0.2s ease-in-out, height 0.4s ease-in-out;
+    padding: 2px;
+    margin:4px;
+    width: 100%;
+    max-width: var(--graph_button_max_width);
+    
+    height: auto;
 }
-.delete_icon.smaller{
-    max-width: 25px;
+
+.graph_button.smaller{
+    max-width: calc(var(--graph_button_max_width) * 0.85);
 }
-.delete_icon.smallest{
-    max-width: 20px;
+.graph_button.smallest{
+    max-width: calc(var(--graph_button_max_width) * 0.75);
 }
-.delete_icon:hover{
+.graph_button:hover{
     box-shadow: 0px 0px 6px 3px $secondary_hover_color;
 }
-.delete_icon.smaller:hover{
+.view_raw_button:hover{
+    box-shadow: 0px 0px 6px 3px $secondary_hover_color;
+}
+.graph_button.smaller:hover{
     box-shadow: 0px 0px 6px 3px $third_hover_color;
 }
-.delete_icon.smallest:hover{
+.graph_button.smallest:hover{
     box-shadow: 0px 0px 6px 3px $fourth_hover_color;
 }
 .add_node_svg_icon{
