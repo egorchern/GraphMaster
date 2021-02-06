@@ -1,5 +1,5 @@
 import * as React from "react";
-import {SlideDown} from "react-slidedown";
+import { SlideDown } from "react-slidedown";
 
 let infinity_symbol = "\u221E";
 function round_to(n, digits) {
@@ -92,11 +92,11 @@ function dijkstras_algorithm(
   //perfor calculations for current node, add current shortest length to edge length to produce new shortest lengths
   function calc_shortest_distances(graph, shortest_distances, queue) {
     let current_node_name = queue[queue.length - 1];
-    if(current_node_name === ""){
+    if (current_node_name === "") {
       return shortest_distances;
     }
     let edges_object = graph[current_node_name];
-    
+
     let edge_names = Object.keys(edges_object);
     for (let i = 0; i < edge_names.length; i += 1) {
       let current_edge_name = edge_names[i];
@@ -107,7 +107,7 @@ function dijkstras_algorithm(
         shortest_distance = distance;
       }
       shortest_distances[current_edge_name] = shortest_distance;
-      
+
     }
     return shortest_distances;
   }
@@ -118,35 +118,35 @@ function dijkstras_algorithm(
     start_node_name,
     end_node_name
   ) {
-    
+
     let node_names = Object.keys(graph);
-    
-    if(shortest_distances[end_node_name] === Infinity){
+
+    if (shortest_distances[end_node_name] === Infinity) {
       return ["None"];
     }
-    
+
     let current_node_name = end_node_name;
     let running_distance = shortest_distances[end_node_name];
     let path = [end_node_name];
     let queue = [end_node_name];
     while (current_node_name != start_node_name) {
-      
-      for(let i = 0; i < node_names.length; i += 1){
+
+      for (let i = 0; i < node_names.length; i += 1) {
         let node_name = node_names[i];
-        if(queue.includes(node_name) === true){
+        if (queue.includes(node_name) === true) {
           continue;
         }
         let edges_object = graph[node_name];
         let edges_names = Object.keys(edges_object);
         let found = false;
-        for(let j = 0; j < edges_names.length; j += 1){
+        for (let j = 0; j < edges_names.length; j += 1) {
           let edge_name = edges_names[j];
-          if(edge_name === current_node_name ){
+          if (edge_name === current_node_name) {
             let length = edges_object[current_node_name];
             let shortest_to = round_to(shortest_distances[node_name], 5);
             let scoped_distance = round_to(running_distance - length, 5);
-            
-            if(scoped_distance === shortest_to){
+
+            if (scoped_distance === shortest_to) {
               running_distance = scoped_distance;
               current_node_name = String(node_name);
               found = true;
@@ -155,12 +155,12 @@ function dijkstras_algorithm(
             }
           }
         }
-        if(found === true){
+        if (found === true) {
           break;
         }
       }
       path.push(current_node_name);
-      
+
       /*
       let edges_object = graph[current_node_name];
       let edges_names = Object.keys(edges_object);
@@ -197,18 +197,18 @@ function dijkstras_algorithm(
       queue
     );
   }
-  
+
   if (return_distances === true) {
     return shortest_distances;
   }
-  
+
   let path = backtrack(
     graph,
     shortest_distances,
     start_node_name,
     end_node_name
   );
-  
+
   let length = shortest_distances[end_node_name];
   return {
     shortest_distances: shortest_distances,
@@ -494,11 +494,11 @@ function floyds_algorithm(graph) {
   return floyds_table;
 }
 
-function depth_traverse(graph, node_name, path, visited_nodes){
+function depth_traverse(graph, node_name, path, visited_nodes) {
   let local_path = JSON.parse(JSON.stringify(path));
   let edges_object = graph[node_name];
   let edges_names = Object.keys(edges_object);
-  
+
   for (let i = 0; i < edges_names.length; i += 1) {
     let current_edge_name = edges_names[i];
     let in_visited_nodes = visited_nodes.includes(current_edge_name);
@@ -509,10 +509,10 @@ function depth_traverse(graph, node_name, path, visited_nodes){
         start: node_name,
         end: current_edge_name,
         length: edges_object[current_edge_name]
-        
+
       });
       visited_nodes.push(current_edge_name);
-      
+
       local_path = depth_traverse(graph, current_edge_name, local_path, visited_nodes);
       //return [local_path, visited_nodes];
     }
@@ -524,7 +524,7 @@ function depth_traverse(graph, node_name, path, visited_nodes){
 function depth_first_traversal(graph, start_node_name) {
   let edges_object = graph[start_node_name];
   let edges_names = Object.keys(edges_object);
-  let all_paths = [];
+
   let global_visited_edges = [start_node_name];
   let global_path = [];
   edges_names.forEach((edge_name) => {
@@ -537,19 +537,49 @@ function depth_first_traversal(graph, start_node_name) {
         length: edges_object[edge_name]
       },
     ];
-    
+
     let scoped_path = depth_traverse(graph, edge_name, path, visited_edges);
-    for(let i = 0; i < scoped_path.length; i += 1){
+    for (let i = 0; i < scoped_path.length; i += 1) {
       let path_part = scoped_path[i];
       let includes = global_visited_edges.includes(path_part.end);
-      if(includes === false){
+      if (includes === false) {
         global_path.push(path_part);
         global_visited_edges.push(path_part.end);
       }
     }
-    
+
   });
   return global_path;
+}
+
+function breadth_first_traversal(graph, start_node_name) {
+  let queue = [start_node_name];
+  let discovered_nodes = [start_node_name];
+  let path = [];
+  while(queue.length != 0){
+    
+    let edges_object = graph[queue[0]];
+    let edges_names = Object.keys(edges_object);
+    for(let j = 0; j < edges_names.length; j += 1){
+      if(discovered_nodes.includes(edges_names[j]) === false){
+        queue.push(edges_names[j]);
+        discovered_nodes.push(edges_names[j]);
+        let path_part = {
+          start: queue[0],
+          end: edges_names[j],
+          length: edges_object[edges_names[j]]
+        }
+        path.push(path_part);
+      }
+    }
+    
+    queue.splice(0, 1);
+    
+    
+  }
+  return path;
+
+  
 }
 
 export class Dijkstras_algorithm_menu extends React.Component {
@@ -683,7 +713,7 @@ export class Kruskals_algorithm_menu extends React.Component {
     super(props);
     this.item_index = this.props.item_index;
     this.graph = this.props.graph;
-   
+
 
     this.state = {
       start_node: "",
@@ -693,7 +723,7 @@ export class Kruskals_algorithm_menu extends React.Component {
   }
   calculate = () => {
     this.state.results = kruskals_algorithm(this.graph);
-    
+
   }
   render() {
     let selected_item_index = this.props.selected_item_index;
@@ -705,7 +735,7 @@ export class Kruskals_algorithm_menu extends React.Component {
     }
     let all_nodes = Object.keys(this.graph);
     let results_markup, mst_length;
-    if(this.state.results != undefined){
+    if (this.state.results != undefined) {
       results_markup = this.state.results.map((queue_item, index) => {
         return (
           <span className="kruskals_items" key={index}>
@@ -725,7 +755,7 @@ export class Kruskals_algorithm_menu extends React.Component {
         className={class_list}
         onClick={() => {
           this.calculate();
-          
+
           this.props.set_highlights(this.state.results);
           this.props.onClick(this.item_index);
         }}
@@ -764,7 +794,7 @@ export class Floyds_algorithm_menu extends React.Component {
     super(props);
     this.item_index = this.props.item_index;
     this.graph = this.props.graph;
-    
+
 
     this.state = {
       start_node: "",
@@ -786,7 +816,7 @@ export class Floyds_algorithm_menu extends React.Component {
       class_list += "hoverable ";
     }
     let all_nodes, table_headers, table_contents;
-    if(this.state.results != undefined){
+    if (this.state.results != undefined) {
       all_nodes = Object.keys(this.graph);
       table_headers = all_nodes.map((node_name, index) => {
         return (
@@ -798,7 +828,7 @@ export class Floyds_algorithm_menu extends React.Component {
       table_contents = this.state.results.map((result_list, node_index) => {
         let values = result_list.map((value, index) => {
           let scoped_value = value;
-          if(scoped_value === Infinity){
+          if (scoped_value === Infinity) {
             scoped_value = infinity_symbol;
           }
           return <td key={index}>{scoped_value}</td>;
@@ -976,7 +1006,7 @@ export class Hamiltonian_cycle_algorithm_menu extends React.Component {
     super(props);
     this.item_index = this.props.item_index;
     this.graph = this.props.graph;
-    
+
     this.state = {
       start_node: "",
       end_node: "",
@@ -997,7 +1027,7 @@ export class Hamiltonian_cycle_algorithm_menu extends React.Component {
     let all_nodes = Object.keys(this.graph);
     let cycle_markup;
     let cycle_length;
-    if(this.state.results != undefined){
+    if (this.state.results != undefined) {
       if (this.state.results.length === 0) {
         cycle_markup = (
           <div className="margin_left flex_direction_row">
@@ -1076,7 +1106,7 @@ export class Depth_first_traversal_algorithm_menu extends React.Component {
     this.setState({
       results: results
     })
-    
+
   };
   on_start_node_value_change = (event) => {
     this.setState({
@@ -1174,6 +1204,124 @@ export class Depth_first_traversal_algorithm_menu extends React.Component {
   }
 }
 
+export class Breadth_first_traversal_algorithm_menu extends React.Component {
+  item_index: number;
+  graph: any;
+  constructor(props) {
+    super(props);
+    this.item_index = this.props.item_index;
+    this.graph = this.props.graph;
+
+    this.state = {
+      start_node: "",
+      results: undefined,
+    };
+  }
+  on_compute_click = () => {
+    let results = breadth_first_traversal(this.graph, this.state.start_node);
+    this.props.set_highlights(results);
+    this.setState({
+      results: results
+    })
+
+  };
+  on_start_node_value_change = (event) => {
+    this.setState({
+      start_node: event.target.value,
+    });
+  };
+  render() {
+    let selected_item_index = this.props.selected_item_index;
+    let class_list = "saved_graph ";
+    if (selected_item_index === this.item_index) {
+      class_list += "selected ";
+    } else {
+      class_list += "hoverable ";
+    }
+    let all_nodes = Object.keys(this.graph);
+
+    let options = all_nodes.map((node_name) => {
+      return <option key={node_name}>{node_name}</option>;
+    });
+
+    let results_markup;
+    if (this.state.results != undefined) {
+      results_markup = this.state.results.map((queue_item, index) => {
+        return (
+          <span className="kruskals_items" key={index}>
+            [{queue_item.start}, {queue_item.end}, {queue_item.length}]
+          </span>
+        );
+      });
+    }
+    let path_length = 0;
+    if (this.state.results != undefined) {
+      for (let i = 0; i < this.state.results.length; i += 1) {
+        let length = this.state.results[i].length;
+        path_length += length;
+      }
+    }
+
+    return (
+      <div
+        className={class_list}
+        onClick={() => {
+          this.props.onClick(this.item_index);
+        }}
+      >
+        <span>Breadth-first traversal</span>
+        <SlideDown className="my_slide_down">
+          {selected_item_index === this.item_index && (
+            <div className="graph_details">
+              <div className="edge_container cursor_default">
+                <div className="create_graph_menu">
+                  <div className="edge_create_grid">
+                    <span>Start node:</span>
+                    <select
+                      className="form-select form-select-sm text_align_center"
+                      value={this.state.start_node}
+                      onChange={this.on_start_node_value_change}
+                    >
+                      <option></option>
+                      {options}
+                    </select>
+                  </div>
+                  <button
+                    className="btn btn-primary display_graph_btn"
+                    onClick={this.on_compute_click}
+                  >
+                    Compute
+                  </button>
+                  <SlideDown className="my_slide_down">
+                    {this.state.results != undefined && (
+                      <div className="flex_direction_column">
+                        <span>Results</span>
+                        <div className="flex_direction_row results">
+                          <div className="flex_direction_column">
+                            <span>Path: </span>
+                          </div>
+
+                          <div className="flex_direction_row flex_wrap">
+                            {results_markup}
+                          </div>
+                        </div>
+                        <span className="margin_top_small">
+                          Path length: {path_length}
+                        </span>
+                      </div>
+                    )}
+                  </SlideDown>
+                </div>
+              </div>
+            </div>
+          )}
+        </SlideDown>
+      </div>
+    );
+  }
+}
+
+
 export class Algorithms_menu extends React.Component {
   previous_item_index: number;
   graph: any;
@@ -1239,6 +1387,13 @@ export class Algorithms_menu extends React.Component {
             item_index={5}
             set_highlights={this.props.set_highlights}
           ></Depth_first_traversal_algorithm_menu>
+          <Breadth_first_traversal_algorithm_menu
+            selected_item_index={this.state.selected_item_index}
+            graph={this.graph}
+            onClick={this.on_item_click}
+            item_index={6}
+            set_highlights={this.props.set_highlights}
+          ></Breadth_first_traversal_algorithm_menu>
         </div>
       </div>
     );
